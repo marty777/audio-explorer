@@ -19,6 +19,8 @@ namespace AudioExplorer
         {
 
             MIDI.MIDIFileReader.readFile(@"..\..\sampledata\MIDI_sample.mid");
+            Console.ReadKey();
+            return;
 
             AudioController audioController = new AudioController(GetSoundOut());
             ChromaticScale.ChromaticScale scale = new ChromaticScale.ChromaticScale();

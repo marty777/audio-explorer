@@ -17,6 +17,7 @@ namespace AudioExplorer.MIDI
         MIDIEvent,
         SysExEvent,
         MetaEvent,
+        UnknownEvent,
     }
 
     public enum MIDIEventType
@@ -70,6 +71,7 @@ namespace AudioExplorer.MIDI
         public uint val4;
         public uint val5;
         public List<byte> message;
+        public uint delta;
         //public string text;
     }
 
