@@ -104,6 +104,7 @@ namespace AudioExplorer.MIDI
                 chunklen |= (ushort)((ushort)fileData[index + 2] << 8);
                 chunklen |= (ushort)((ushort)fileData[index + 3]);
                 index += 4;
+                Console.WriteLine("Chunklen {0}", chunklen);
                 if ((UInt64)fileData.Length < index + chunklen)
                 {
                     throw new Exception("File data too short to contain track chunk of length " + chunklen +" at index " + (index - 8));
@@ -113,25 +114,7 @@ namespace AudioExplorer.MIDI
                 UInt64 trackindex = index;
                 while(trackindex < index + chunklen)
                 {
-                    //Console.WriteLine("Event start {0}", trackindex);
                     MIDIEvent new_event = MIDIFileReader.readEvent(fileData, ref trackindex);
-                    
-                    //Console.WriteLine("trackindex {0} fileData length {1}", trackindex, fileData.Length);
-                    //Console.WriteLine("Adding event type {0} midievent {1} sysexevent {2} metaevent {3}  val1 {4} message ", new_event.type, new_event.midieventtype, new_event.sysexeeventtype, new_event.metaeventtype, new_event.val1);
-                    //if (new_event.message != null)
-                    //{
-                    //    for (int i = 0; i < new_event.message.Count; i++)
-                    //    {
-                    //        Console.Write("{0:X2}", new_event.message[i]);
-                    //    }
-                    //    Console.WriteLine();
-                    //    for (int i = 0; i < new_event.message.Count; i++)
-                    //    {
-                    //        Console.Write("{0}", (char)new_event.message[i]);
-                    //    }
-                    //    Console.WriteLine();
-                    //}
-                    //Console.WriteLine();
                     track.events.Add(new_event);
                 }
                 data.tracks.Add(track);
@@ -360,7 +343,8 @@ namespace AudioExplorer.MIDI
                         {
                             // hope that this is only two bytes long
                             new_event.type = EventType.UnknownEvent;
-                            new_event.val1 = fileData[trackindex + 1];
+                            new_event.val1 = fileData[trackindex];//fileData[trackindex + 1];
+                            new_event.val2 = fileData[trackindex + 1];
                             trackindex += 2;
                             //throw new Exception(String.Format("Unknown field found {0:X2} at index {1}", fileData[trackindex], trackindex));
                         }
@@ -372,7 +356,8 @@ namespace AudioExplorer.MIDI
                 default:
                     //throw new Exception(String.Format("Undefined event start {0:X2} byte at index {1} ", fileData[trackindex], trackindex));
                     new_event.type = EventType.UnknownEvent;
-                    new_event.val1 = fileData[trackindex + 1];
+                    new_event.val1 = fileData[trackindex];//fileData[trackindex + 1];
+                    new_event.val2 = fileData[trackindex + 1];
                     trackindex += 2;
                     break;
 
