@@ -22,7 +22,7 @@ namespace AudioExplorer
 
             MIDI.MIDIPlayer player = new MIDI.MIDIPlayer(data);
             Console.WriteLine("Track 0 events:");
-            player.playTrack(0);
+            player.playTrack(1);
 
             Console.ReadKey();
             return;

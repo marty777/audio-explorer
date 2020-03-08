@@ -42,6 +42,29 @@ namespace AudioExplorer.MIDI
             return data;
         }
 
+        static void dumpHex(byte[] bytes)
+        {
+            int len = 16;
+            List<string> lines = new List<string>();
+            
+            for(int i = 0; i < bytes.Length; i+=len)
+            {
+                StringBuilder builder = new StringBuilder();
+                builder.AppendFormat("{0}:\t", i);
+                for(int j = 0; j < len && i + j < bytes.Length; j++)
+                {
+                    builder.AppendFormat("{0:X2} ", bytes[i + j]);
+                }
+                builder.AppendFormat("\t");
+                for (int j = 0; j < len && i + j < bytes.Length; j++)
+                {
+                    builder.AppendFormat("{0} ", (char)bytes[i + j]);
+                }
+                lines.Add(builder.ToString());
+            }
+            System.IO.File.WriteAllLines(@"..\output.txt", lines);
+        }
+
         // returns length of header
         static UInt64 readHeader(byte[] fileData, MIDIData data)
         {
@@ -112,9 +135,11 @@ namespace AudioExplorer.MIDI
                 MIDITrack track;
                 track.events = new List<MIDIEvent>();
                 UInt64 trackindex = index;
+                MIDIEvent previous = new MIDIEvent();
                 while(trackindex < index + chunklen)
                 {
-                    MIDIEvent new_event = MIDIFileReader.readEvent(fileData, ref trackindex);
+                    MIDIEvent new_event = MIDIFileReader.readEvent(fileData, ref trackindex, previous);
+                    previous = new_event;
                     track.events.Add(new_event);
                 }
                 data.tracks.Add(track);
@@ -126,11 +151,17 @@ namespace AudioExplorer.MIDI
         }
 
         // reads event or throws exception, advances index to end of event fields
-        public static MIDIEvent readEvent(byte[] fileData, ref UInt64 index)
+        // In a breathtaking display of parsimony, instructions that repeat the status
+        // byte of the previous instruction *may be* written without that status byte. 
+        // If there isn't a high-bit byte following the delta-time, assume it's a repeated
+        // instruction. The transmission speeds of early equipment must have been 
+        // extremely low.
+        public static MIDIEvent readEvent(byte[] fileData, ref UInt64 index, MIDIEvent previous)
         {
             MIDIEvent new_event = new MIDIEvent();
             UInt64 trackindex = index;
             new_event.delta = readVariableLengthQuantity(fileData, ref trackindex);
+            new_event.pos = index;
             switch (fileData[trackindex] >> 4 & 0xF) // first 4 bits
             {
                 case 0x8:
@@ -342,23 +373,84 @@ namespace AudioExplorer.MIDI
                         else
                         {
                             // hope that this is only two bytes long
+                            Console.WriteLine("Unknown event at index {0} with opening byte {1:X2}", trackindex, fileData[trackindex]);
                             new_event.type = EventType.UnknownEvent;
                             new_event.val1 = fileData[trackindex];//fileData[trackindex + 1];
                             new_event.val2 = fileData[trackindex + 1];
                             trackindex += 2;
                             //throw new Exception(String.Format("Unknown field found {0:X2} at index {1}", fileData[trackindex], trackindex));
                         }
-
-
-                        // this gets a little complicated with continuation events. 
+                        
                     }
                     break;
                 default:
-                    //throw new Exception(String.Format("Undefined event start {0:X2} byte at index {1} ", fileData[trackindex], trackindex));
-                    new_event.type = EventType.UnknownEvent;
-                    new_event.val1 = fileData[trackindex];//fileData[trackindex + 1];
-                    new_event.val2 = fileData[trackindex + 1];
-                    trackindex += 2;
+                    // okay, might be a running status. Check the provided previous event, which must be a MIDI event rather than a sysex or meta event
+                    if(previous.type != EventType.MIDIEvent)
+                    {
+                        throw new Exception(String.Format("Undefined event start {0:X2} byte at index {1} ", fileData[trackindex], trackindex));
+                    }
+                    switch(previous.midieventtype)
+                    {
+                        case MIDIEventType.NoteOff:
+                            new_event.midieventtype = previous.midieventtype;
+                            new_event.val1 = previous.val1;
+                            new_event.val2 = fileData[trackindex];
+                            new_event.val3 = fileData[trackindex + 1];
+                            trackindex += 2;
+                            new_event.running = true;
+                            break;
+                        case MIDIEventType.NoteOn:
+                            new_event.midieventtype = previous.midieventtype;
+                            new_event.val1 = previous.val1;
+                            new_event.val2 = fileData[trackindex];
+                            new_event.val3 = fileData[trackindex + 1];
+                            trackindex += 2;
+                            new_event.running = true;
+                            break;
+                        case MIDIEventType.PolyphonicPressure:
+                            new_event.midieventtype = previous.midieventtype;
+                            new_event.val1 = previous.val1;
+                            new_event.val2 = fileData[trackindex];
+                            new_event.val3 = fileData[trackindex + 1];
+                            trackindex += 2;
+                            new_event.running = true;
+                            break;
+                        case MIDIEventType.Controller:
+                            new_event.midieventtype = previous.midieventtype;
+                            new_event.val1 = previous.val1;
+                            new_event.val2 = fileData[trackindex];
+                            new_event.val3 = fileData[trackindex + 1];
+                            trackindex += 2;
+                            new_event.running = true;
+                            break;
+                        case MIDIEventType.ProgramChange:
+                            new_event.midieventtype = previous.midieventtype;
+                            new_event.val1 = previous.val1;
+                            new_event.val2 = fileData[trackindex];
+                            trackindex += 1;
+                            new_event.running = true;
+                            break;
+                        case MIDIEventType.ChannelPresure:
+                            new_event.midieventtype = previous.midieventtype;
+                            new_event.val1 = previous.val1;
+                            new_event.val2 = fileData[trackindex];
+                            trackindex += 1;
+                            new_event.running = true;
+                            break;
+                        case MIDIEventType.PitchBend:
+                            new_event.midieventtype = previous.midieventtype;
+                            new_event.val1 = previous.val1;
+                            new_event.val2 = fileData[trackindex];
+                            new_event.val3 = fileData[trackindex + 1];
+                            trackindex += 2;
+                            new_event.running = true;
+                            break;
+                        default:
+                            throw new Exception(String.Format("Undefined event start {0:X2} byte at index {1} ", fileData[trackindex], trackindex));
+                            break;
+                    }
+
+                    
                     break;
 
             }

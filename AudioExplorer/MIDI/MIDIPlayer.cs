@@ -33,16 +33,16 @@ namespace AudioExplorer.MIDI
             switch(midievent.type)
             {
                 case EventType.UnknownEvent:
-                    Console.WriteLine("{0}\tUnknown Event {1:X2} {2:X2}", midievent.delta, midievent.val1, midievent.val2);
+                    Console.WriteLine("{0}\tUnknown Event {1:X2} {2:X2} pos {3}", midievent.delta, midievent.val1, midievent.val2, midievent.pos);
                     break;
                 case EventType.MetaEvent:
-                    Console.WriteLine("{0}\tMeta Event {1}", midievent.delta, midievent.metaeventtype);
+                    Console.WriteLine("{0}\tMeta Event {1} pos {2} running {3}", midievent.delta, midievent.metaeventtype, midievent.pos, midievent.running);
                     break;
                 case EventType.SysExEvent:
-                    Console.WriteLine("{0}\tSysEx Event {1}", midievent.delta, midievent.sysexeeventtype);
+                    Console.WriteLine("{0}\tSysEx Event {1} pos {2} running {3}", midievent.delta, midievent.sysexeeventtype, midievent.pos, midievent.running);
                     break;
                 case EventType.MIDIEvent:
-                    Console.WriteLine("{0}\tMIDI Event {1}", midievent.delta, midievent.midieventtype);
+                    Console.WriteLine("{0}\tMIDI Event {1} pos {2} running {3}", midievent.delta, midievent.midieventtype, midievent.pos, midievent.running);
                     break;
             }
         }

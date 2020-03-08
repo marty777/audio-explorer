@@ -72,6 +72,8 @@ namespace AudioExplorer.MIDI
         public uint val5;
         public List<byte> message;
         public uint delta;
+        public UInt64 pos;
+        public bool running;
         //public string text;
     }
 
