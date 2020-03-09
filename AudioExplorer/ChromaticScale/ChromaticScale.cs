@@ -47,13 +47,21 @@ namespace AudioExplorer.ChromaticScale
 
         public double getMidiFreqFromKeyNum(int keynum)
         {
-            // MIDI key indexes go between 21 (low A, 27.5 Hz) and 128 (high G#, 13289.75 Hz). I think indexes down to zero are possible, 
-            // but 30 Hz is already pretty low for human hearing (20 Hz is the general limit) so I'm going to ignore it atm. Middle A 440 Hz is index 69.
-            if (keynum < 21 || keynum > 128)
+            // MIDI key indexes go between 21 (low A, 27.5 Hz) and 128 (high G#, 13289.75 Hz). Indexes can run down to 0 (very low C at 8.1 Hz), well outside
+            // the low end for human hearing (20 Hz is the general limit). Middle A 440 Hz is index 69.
+            if (keynum < 0 || keynum > 128)
             {
                 throw new ArgumentOutOfRangeException("Specified MIDI key index is out of expected range");
             }
-            if(keynum >= 21 && keynum <= 32)
+            if(keynum >= 0 && keynum < 8)
+            {
+                return notes[keynum + 3].base_freq / 64;
+            }
+            else if (keynum >= 9 && keynum <= 20)
+            {
+                return notes[keynum - 9].base_freq / 32;
+            }
+            else if (keynum >= 21 && keynum <= 32)
             {
                 return notes[keynum - 21].base_freq / 16;
             }
