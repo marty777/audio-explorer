@@ -29,7 +29,7 @@ namespace AudioExplorer.MIDI
                     Console.WriteLine("Timecode FPS: {0} SFR:{1}", data.timecode_fps, data.timecode_sfr);
                 }
                 UInt64 trackChunkEnd = trackChunkStart;
-                while (trackChunkEnd <  (UInt64)fileBytes.Length && data.tracks.Count < 3) {
+                while (trackChunkEnd <  (UInt64)fileBytes.Length && data.tracks.Count < data.ntracks) {
                     trackChunkEnd = MIDIFileReader.readTracks(fileBytes, data, trackChunkEnd);
                     Console.WriteLine("Track {0} read with {1} events", data.tracks.Count, data.tracks[data.tracks.Count - 1].events.Count);
                 }
@@ -91,6 +91,9 @@ namespace AudioExplorer.MIDI
                 throw new Exception("Unexpected chunk length in header (was "+ chunklen + " expected "+ expectedChunkLen + ")");
             }
             data.format = (ushort) ((ushort)fileData[8] << 8 | (ushort)fileData[9]);
+            if(data.format > 2) {
+                throw new Exception("Undefined format value in header (" + data.format + ")");
+            }
             data.ntracks = (ushort)((ushort)fileData[10] << 8 | (ushort)fileData[11]);
             data.tickdiv = (ushort)((ushort)fileData[12] << 8 | (ushort)fileData[13]);
             
@@ -226,7 +229,7 @@ namespace AudioExplorer.MIDI
                         trackindex = trackindex + 2;
                         uint length = MIDIFileReader.readVariableLengthQuantity(fileData, ref trackindex); // trackindex updated to end of length field
                        
-                        if (trackindex + length >= (UInt64)fileData.Length)
+                        if (trackindex + length > (UInt64)fileData.Length)
                         {
                             throw new Exception("File data too short to contain metadata event of length " + length + " at index " + (trackindex));
                         }

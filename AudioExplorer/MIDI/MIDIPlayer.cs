@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using AudioExplorer.Audio;
 using AudioExplorer.SampleSource;
@@ -22,11 +23,90 @@ namespace AudioExplorer.MIDI
             if (trackIndex >= data.tracks.Count) {
                 throw new Exception(String.Format("Invalid track index {0} specified. Highest available track index is {1}", trackIndex, data.tracks.Count - 1));
             }
-            UInt64 ticks = 0;
-            for(int i = 0; i < data.tracks[trackIndex].events.Count; i++)
+
+            // determine timing increments
+            UInt64 time_inc_us = 1;
+            UInt64 time_offset_us = 0; // start time offset
+            if (data.timing == TimingScheme.MetricalTiming) {
+                // locate tempo event in track 0 (format 0 or 1) or playing track for format 2
+                UInt64 us_per_quarternote = 5000; // 120 bpm default (I think)
+                switch (data.format)
+                {
+                    case 0:
+                        for (int i = 0; i < data.tracks[trackIndex].events.Count; i++) {
+                            if(data.tracks[trackIndex].events[i].type == EventType.MetaEvent && data.tracks[trackIndex].events[i].metaeventtype == MetaEventType.Tempo)
+                            {
+                                Console.WriteLine("Tempo event with value {0} ({0:X2})", data.tracks[trackIndex].events[i].val1);
+                                us_per_quarternote = data.tracks[trackIndex].events[i].val1;
+                                time_inc_us = us_per_quarternote / data.tickdiv;
+                                break;
+                            }
+                            
+                        }
+                        break;
+                    case 1:
+                        for (int i = 0; i < data.tracks[0].events.Count; i++)
+                        {
+                            if (data.tracks[0].events[i].type == EventType.MetaEvent && data.tracks[0].events[i].metaeventtype == MetaEventType.Tempo)
+                            {
+                                Console.WriteLine("Tempo event with value {0} ({0:X2})", data.tracks[0].events[i].val1);
+                                us_per_quarternote = data.tracks[0].events[i].val1;
+                                time_inc_us = us_per_quarternote / data.tickdiv; // should give us/p
+                                break;
+                            }
+                            else if (data.tracks[0].events[i].type == EventType.MetaEvent && data.tracks[0].events[i].metaeventtype == MetaEventType.TimeSignature)
+                            {
+                                Console.WriteLine("TimeSignature event with value {0} {1} {2} {3} ({0:X2} {1:X2} {2:X2} {3:X2})", data.tracks[0].events[i].val1, data.tracks[0].events[i].val2, data.tracks[0].events[i].val3, data.tracks[0].events[i].val4);
+                                break;
+                            }
+                        }
+                        break;
+                    case 2:
+                        for (int i = 0; i < data.tracks[trackIndex].events.Count; i++)
+                        {
+                            if (data.tracks[trackIndex].events[i].type == EventType.MetaEvent && data.tracks[trackIndex].events[i].metaeventtype == MetaEventType.Tempo)
+                            {
+                                Console.WriteLine("Tempo event with value {0} ({0:X2})", data.tracks[trackIndex].events[i].val1);
+                                us_per_quarternote = data.tracks[trackIndex].events[i].val1;
+                                time_inc_us = us_per_quarternote / data.tickdiv;
+                                break;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            } else
             {
-                printEvent(data.tracks[trackIndex].events[i]);
+
             }
+
+            UInt64 ticks = 0; // ticks are in microseconds
+            UInt64 curr_ticks = 0;
+            int event_index = -1;
+            while(event_index < data.tracks[trackIndex].events.Count)
+            {
+                while (curr_ticks == 0) {
+                    event_index += 1;
+                    if(data.tracks[trackIndex].events[event_index].type == EventType.MIDIEvent)
+                    {
+                        switch(data.tracks[trackIndex].events[event_index].midieventtype)
+                        {
+                            case MIDIEventType.NoteOn:
+                                break;
+                            case MIDIEventType.NoteOff:
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    curr_ticks = data.tracks[trackIndex].events[event_index].delta;
+                }
+                Thread.Sleep((int)time_inc_us/1000);
+                ticks += time_inc_us;
+                curr_ticks--;
+            }
+            
         }
 
         public void printEvent(MIDIEvent midievent) {

@@ -16,6 +16,7 @@ namespace AudioExplorer.Audio
     class AudioController
     {
         private List<double> frequencies;
+        private List<int> midiKeys;
         private SoundMixer mixer;
         private const int sampleRate = 4410;
         private ChannelMatrix monoToStereoChannelMatrix;
@@ -54,6 +55,16 @@ namespace AudioExplorer.Audio
         public void addFrequency(double freq)
         {
             frequencies.Add(freq);
+        }
+        
+        public void startPlayingMIDIKey(int midikey)
+        {
+
+        }
+
+        public void stopPlayingKey(int midikey)
+        {
+
         }
 
         public void startPlaying()
