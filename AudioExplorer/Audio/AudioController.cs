@@ -104,8 +104,8 @@ namespace AudioExplorer.Audio
             ChromaticScale.ChromaticScale scale = new ChromaticScale.ChromaticScale();
             for(int i = 0; i <= 128; i++)
             {
-                Console.WriteLine("Addding {0} - freq {1} name {2}", i, scale.getMidiFreqFromKeyNum(i), scale.getMidNoteNameFromKeyNum(i));
-                WaveGenerator generator = new WaveGenerator(WaveGenerator.WaveType.InverseSawtoothWave, scale.getMidiFreqFromKeyNum(i), 1.0, 0.0);
+                Console.WriteLine("Adding {0} - freq {1} name {2} to mixer", i, scale.getMidiFreqFromKeyNum(i), scale.getMidNoteNameFromKeyNum(i));
+                WaveGenerator generator = new WaveGenerator(WaveGenerator.WaveType.TriangleWave, scale.getMidiFreqFromKeyNum(i), 1.0, 0.0);
                 VolumeSource vol;
                 mixer.AddSource(
                     generator.ToWaveSource()
@@ -157,48 +157,19 @@ namespace AudioExplorer.Audio
             mixer.RemoveAllSources();
         }
 
-        public void updatePlaying(double freq, int waveform = 0)
+        public void updatePlaying(double freq, WaveGenerator.WaveType wavetype)
         {
             frequencies.Clear();
             frequencies.Add(freq);
             mixer.RemoveAllSources();
             VolumeSource vol;
-            if (waveform == 0) {
-                SineGenerator generator = new SineGenerator(freq, 1.0, 0);
-                mixer.AddSource(
-                   generator.ToWaveSource()
-                   .AppendSource(x => new DmoChannelResampler(x, monoToStereoChannelMatrix, sampleRate))
-                   .AppendSource(x => new VolumeSource(x.ToSampleSource()), out vol)
-                   );
-            }
-            else if (waveform == 1)
-            {
-                SquareGenerator generator = new SquareGenerator(freq, 1.0, 0);
-                mixer.AddSource(
+            WaveGenerator generator = new WaveGenerator(wavetype, freq, 1.0, 0);
+            mixer.AddSource(
                   generator.ToWaveSource()
                   .AppendSource(x => new DmoChannelResampler(x, monoToStereoChannelMatrix, sampleRate))
                   .AppendSource(x => new VolumeSource(x.ToSampleSource()), out vol)
                   );
-            }
-            else if (waveform == 2)
-            {
-                SawtoothGenerator generator = new SawtoothGenerator(freq, 1.0, 0);
-                mixer.AddSource(
-                  generator.ToWaveSource()
-                  .AppendSource(x => new DmoChannelResampler(x, monoToStereoChannelMatrix, sampleRate))
-                  .AppendSource(x => new VolumeSource(x.ToSampleSource()), out vol)
-                  );
-            }
-            else
-            {
-                TriangleGenerator generator = new TriangleGenerator(freq, 1.0, 0);
-                mixer.AddSource(
-                  generator.ToWaveSource()
-                  .AppendSource(x => new DmoChannelResampler(x, monoToStereoChannelMatrix, sampleRate))
-                  .AppendSource(x => new VolumeSource(x.ToSampleSource()), out vol)
-                  );
-            }
-          
+            
             Debug.WriteLine(frequencies.Count().ToString() + " frequencies");
             
         }

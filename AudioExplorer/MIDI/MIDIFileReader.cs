@@ -135,8 +135,7 @@ namespace AudioExplorer.MIDI
                 {
                     throw new Exception("File data too short to contain track chunk of length " + chunklen +" at index " + (index - 8));
                 }
-                MIDITrack track;
-                track.events = new List<MIDIEvent>();
+                MIDITrack track = new MIDITrack();
                 UInt64 trackindex = index;
                 MIDIEvent previous = new MIDIEvent();
                 while(trackindex < index + chunklen)

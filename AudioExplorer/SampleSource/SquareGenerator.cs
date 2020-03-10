@@ -110,8 +110,7 @@ namespace AudioExplorer.SampleSource
                 {
                     buffer[i] = (float)(Amplitude);
                 }
-
-               
+                
                 Phase += phaseinc;
             }
 

@@ -30,7 +30,7 @@ namespace AudioExplorer.MIDI
             UInt64 time_offset_us = 0; // start time offset
             if (data.timing == TimingScheme.MetricalTiming) {
                 // locate tempo event in track 0 (format 0 or 1) or playing track for format 2
-                UInt64 us_per_quarternote = 5000; // 120 bpm default (I think)
+                UInt64 us_per_quarternote = 500000; // 120 bpm default (I think)
                 switch (data.format)
                 {
                     case 0:
@@ -79,24 +79,24 @@ namespace AudioExplorer.MIDI
                 }
             } else
             {
-
+                // 1 tick is the sub-frame resolution 
+                time_inc_us = (UInt64)(1000000 / (data.timecode_fps * data.timecode_sfr));
             }
 
             UInt64 ticks = 0; // ticks are in microseconds
-            UInt64 curr_ticks = 0;
-            int event_index = -1;
+            int event_index = 0;
+            UInt64 curr_ticks = data.tracks[trackIndex].events[0].delta;
             AudioController audioController = new AudioController(GetSoundOut());
             audioController.startPlayingMidi();
             while (event_index < data.tracks[trackIndex].events.Count)
             {
-                while (curr_ticks == 0) {
-                    event_index += 1;
+                while (curr_ticks == 0 && event_index < data.tracks[trackIndex].events.Count) {
                     if (data.tracks[trackIndex].events[event_index].type == EventType.MIDIEvent)
                     {
                         MIDIEvent the_event = data.tracks[trackIndex].events[event_index];
-                        if (the_event.val1 == 0)
+                        if (the_event.val1 == 0) // channel 0 for note events
                         {
-                            switch (data.tracks[trackIndex].events[event_index].midieventtype)
+                            switch (the_event.midieventtype)
                             {
                                 case MIDIEventType.NoteOn:
                                     audioController.startPlayingMIDIKey((int)the_event.val2, (float)the_event.val3);
@@ -112,12 +112,23 @@ namespace AudioExplorer.MIDI
                             }
                         }
                     }
+                    event_index += 1;
+                    if (event_index >= data.tracks[trackIndex].events.Count)
+                    {
+                        break;
+                    }
                     curr_ticks = data.tracks[trackIndex].events[event_index].delta;
                 }
                 audioController.updateMidiKeys(1.0f); // 1 increment
                 Thread.Sleep((int)time_inc_us/1000);
                 ticks += time_inc_us;
                 curr_ticks--;
+                
+                if(event_index >= data.tracks[trackIndex].events.Count)
+                {
+                    break;
+                }
+                //Console.WriteLine("ticks {0} event_index {1} ({2}) curr_ticks {3}", ticks, event_index, data.tracks[trackIndex].events[event_index].delta, curr_ticks);
             }
             
         }

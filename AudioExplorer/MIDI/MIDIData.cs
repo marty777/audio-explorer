@@ -59,28 +59,32 @@ namespace AudioExplorer.MIDI
         SequencerSpecificEvent,
     }
 
-    public struct MIDIEvent
+    public class MIDIEvent
     {
-        public EventType type;
-        public MIDIEventType midieventtype;
-        public SysExEventType sysexeeventtype;
-        public MetaEventType metaeventtype;
-        public uint val1;
-        public uint val2;
-        public uint val3;
-        public uint val4;
-        public uint val5;
-        public List<byte> message;
-        public uint delta;
-        public UInt64 pos;
+        public EventType type { get; set; }
+        public MIDIEventType midieventtype { get; set; }
+        public SysExEventType sysexeeventtype { get; set; }
+        public MetaEventType metaeventtype { get; set; }
+        public uint val1 { get; set; }
+        public uint val2 { get; set; }
+        public uint val3 { get; set; }
+        public uint val4 { get; set; }
+        public uint val5 { get; set; }
+        public List<byte> message { get; set; }
+        public uint delta { get; set; }
+        public UInt64 pos { get; set; }
         public bool running;
-        //public string text;
     }
 
-    struct MIDITrack
+    class MIDITrack
     {   
 
         public List<MIDIEvent> events;
+
+        public MIDITrack()
+        {
+            events = new List<MIDIEvent>();
+        }
     }
 
     class MIDIData
