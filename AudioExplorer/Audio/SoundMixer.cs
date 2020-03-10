@@ -11,6 +11,7 @@ namespace AudioExplorer.Audio
     {
         private readonly WaveFormat _waveFormat;
         private readonly List<ISampleSource> _sampleSources = new List<ISampleSource>();
+        private readonly List<float> _sampleVolumes = new List<float>(); // between 0.0 and 1.0
         private readonly object _lockObj = new object();
         private float[] _mixerBuffer;
 
@@ -41,17 +42,45 @@ namespace AudioExplorer.Audio
             lock (_lockObj)
             {
                 if (!Contains(source))
+                {
                     _sampleSources.Add(source);
+                    _sampleVolumes.Add(1.0f);
+                }
             }
+            
         }
 
+        public void setSourceVolume(int index, float volume)
+        {
+            if (index < 0 || index >= _sampleVolumes.Count)
+            {
+                throw new IndexOutOfRangeException(String.Format("Index {0} outside range [0..{1}]", index, _sampleVolumes.Count));
+            }
+            if(volume < 0)
+            {
+                _sampleVolumes[index] = 0.0f;
+            }
+            else if(volume > 1.0f)
+            {
+                _sampleVolumes[index] = 1.0f;
+            }
+            else
+            {
+                _sampleVolumes[index] = volume;
+            }
+        }
+        
         public void RemoveSource(ISampleSource source)
         {
             //don't throw null ex here
             lock (_lockObj)
             {
                 if (Contains(source))
-                    _sampleSources.Remove(source);
+                {
+                    int index = _sampleSources.IndexOf(source);
+                    _sampleSources.RemoveAt(index);
+                    _sampleVolumes.RemoveAt(index);
+                }
             }
         }
 
@@ -60,7 +89,13 @@ namespace AudioExplorer.Audio
             lock (_lockObj)
             {
                 _sampleSources.Clear();
+                _sampleVolumes.Clear();
             }
+        }
+
+        public int numSources()
+        {
+            return _sampleSources.Count;
         }
 
         public bool Contains(ISampleSource source)
@@ -82,14 +117,23 @@ namespace AudioExplorer.Audio
                     List<int> numberOfReadSamples = new List<int>();
                     for (int m = _sampleSources.Count - 1; m >= 0; m--)
                     {
+                        if(_sampleVolumes[m] == 0)
+                        {
+                            continue;
+                        }
                         var sampleSource = _sampleSources[m];
                         int read = sampleSource.Read(_mixerBuffer, 0, count);
                         for (int i = offset, n = 0; n < read; i++, n++)
                         {
-                            if (numberOfStoredSamples <= i)
-                                buffer[i] = (m == 1 ? -_mixerBuffer[n] : _mixerBuffer[n]);
-                            else
-                                buffer[i] += (m == 1 ? -_mixerBuffer[n] : _mixerBuffer[n]);
+                            //if (numberOfStoredSamples <= i)
+                            //    buffer[i] = (m == 1 ? -_mixerBuffer[n] : _mixerBuffer[n]);
+                            //else
+                            //    buffer[i] += (m == 1 ? -_mixerBuffer[n] : _mixerBuffer[n]);
+
+                            //if (numberOfStoredSamples <= i)
+                            //    buffer[i] = (m == 1 ? -_mixerBuffer[n] : _mixerBuffer[n]);
+                            //else
+                                buffer[i] +=  _mixerBuffer[n] * _sampleVolumes[m];
                         }
                         if (read > numberOfStoredSamples)
                             numberOfStoredSamples = read;
@@ -169,6 +213,7 @@ namespace AudioExplorer.Audio
                     sampleSource.Dispose();
                     _sampleSources.Remove(sampleSource);
                 }
+                _sampleVolumes.Clear();
             }
         }
     }

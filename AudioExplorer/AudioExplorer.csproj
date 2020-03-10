@@ -58,6 +58,7 @@
     <Compile Include="SampleSource\SawtoothGenerator.cs" />
     <Compile Include="SampleSource\SquareGenerator.cs" />
     <Compile Include="SampleSource\TriangleGenerator.cs" />
+    <Compile Include="SampleSource\WaveGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

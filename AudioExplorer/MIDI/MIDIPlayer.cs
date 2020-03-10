@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AudioExplorer.Audio;
 using AudioExplorer.SampleSource;
+using CSCore.SoundOut;
 
 namespace AudioExplorer.MIDI
 {
@@ -84,24 +85,36 @@ namespace AudioExplorer.MIDI
             UInt64 ticks = 0; // ticks are in microseconds
             UInt64 curr_ticks = 0;
             int event_index = -1;
-            while(event_index < data.tracks[trackIndex].events.Count)
+            AudioController audioController = new AudioController(GetSoundOut());
+            audioController.startPlayingMidi();
+            while (event_index < data.tracks[trackIndex].events.Count)
             {
                 while (curr_ticks == 0) {
                     event_index += 1;
-                    if(data.tracks[trackIndex].events[event_index].type == EventType.MIDIEvent)
+                    if (data.tracks[trackIndex].events[event_index].type == EventType.MIDIEvent)
                     {
-                        switch(data.tracks[trackIndex].events[event_index].midieventtype)
+                        MIDIEvent the_event = data.tracks[trackIndex].events[event_index];
+                        if (the_event.val1 == 0)
                         {
-                            case MIDIEventType.NoteOn:
-                                break;
-                            case MIDIEventType.NoteOff:
-                                break;
-                            default:
-                                break;
+                            switch (data.tracks[trackIndex].events[event_index].midieventtype)
+                            {
+                                case MIDIEventType.NoteOn:
+                                    audioController.startPlayingMIDIKey((int)the_event.val2, (float)the_event.val3);
+                                    Console.WriteLine("NoteOn {0} {1}", the_event.val2, the_event.val3);
+                                    break;
+                                case MIDIEventType.NoteOff:
+                                    audioController.stopPlayingMIDIKey((int)the_event.val2, (float)the_event.val3);
+                                    Console.WriteLine("NoteOff {0} {1}", the_event.val2, the_event.val3);
+                                    break;
+                                default:
+                                    break;
+
+                            }
                         }
                     }
                     curr_ticks = data.tracks[trackIndex].events[event_index].delta;
                 }
+                audioController.updateMidiKeys(1.0f); // 1 increment
                 Thread.Sleep((int)time_inc_us/1000);
                 ticks += time_inc_us;
                 curr_ticks--;
@@ -125,6 +138,14 @@ namespace AudioExplorer.MIDI
                     Console.WriteLine("{0}\tMIDI Event {1} pos {2} running {3}", midievent.delta, midievent.midieventtype, midievent.pos, midievent.running);
                     break;
             }
+        }
+
+        static private ISoundOut GetSoundOut()
+        {
+            if (WasapiOut.IsSupportedOnCurrentPlatform)
+                return new WasapiOut();
+            else
+                return new DirectSoundOut();
         }
     }
 }

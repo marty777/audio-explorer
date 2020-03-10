@@ -13,10 +13,18 @@ using AudioExplorer.SampleSource;
 
 namespace AudioExplorer.Audio
 {
+    class MidiKeyPlaying
+    {
+        public double freq { get; set; }
+        public string name { get; set; }
+        public float vol { get; set; }
+        public float vol_vel { get; set; }
+    }
+
     class AudioController
     {
         private List<double> frequencies;
-        private List<int> midiKeys;
+        private List<MidiKeyPlaying> midiKeys { get; set; }
         private SoundMixer mixer;
         private const int sampleRate = 4410;
         private ChannelMatrix monoToStereoChannelMatrix;
@@ -39,6 +47,7 @@ namespace AudioExplorer.Audio
             });
 
             soundOut = programSoundOut;
+            midiKeys = new List<MidiKeyPlaying>();
         }
 
         public void Dispose()
@@ -57,12 +66,61 @@ namespace AudioExplorer.Audio
             frequencies.Add(freq);
         }
         
-        public void startPlayingMIDIKey(int midikey)
+        public void startPlayingMIDIKey(int midikey, float vel)
         {
-
+            midiKeys[midikey].vol_vel = vel;
         }
 
-        public void stopPlayingKey(int midikey)
+        public void stopPlayingMIDIKey(int midikey, float vel)
+        {
+            midiKeys[midikey].vol_vel = -vel;
+        }
+
+        public void updateMidiKeys(float delta)
+        {
+            for (int i = 0; i < midiKeys.Count; i++)
+            {
+                if (midiKeys[i].vol_vel == 0.0f)
+                {
+                    continue;
+                }
+                midiKeys[i].vol += midiKeys[i].vol_vel * delta;
+                if (midiKeys[i].vol > 1.0f)
+                {
+                    midiKeys[i].vol = 1.0f;
+                    midiKeys[i].vol_vel = 0.0f;
+                }
+                else if (midiKeys[i].vol < 0.0f)
+                {
+                    midiKeys[i].vol = 0.0f;
+                    midiKeys[i].vol_vel = 0.0f;
+                }
+                mixer.setSourceVolume(i, midiKeys[i].vol);
+            }
+        }
+
+        public void startPlayingMidi()
+        {
+            ChromaticScale.ChromaticScale scale = new ChromaticScale.ChromaticScale();
+            for(int i = 0; i <= 128; i++)
+            {
+                Console.WriteLine("Addding {0} - freq {1} name {2}", i, scale.getMidiFreqFromKeyNum(i), scale.getMidNoteNameFromKeyNum(i));
+                WaveGenerator generator = new WaveGenerator(WaveGenerator.WaveType.InverseSawtoothWave, scale.getMidiFreqFromKeyNum(i), 1.0, 0.0);
+                VolumeSource vol;
+                mixer.AddSource(
+                    generator.ToWaveSource()
+                    .AppendSource(x => new DmoChannelResampler(x, monoToStereoChannelMatrix, sampleRate))
+                    .AppendSource(x => new VolumeSource(x.ToSampleSource()), out vol)
+                    );
+                mixer.setSourceVolume(i, 0.0f);
+                midiKeys.Add(new MidiKeyPlaying { freq = scale.getMidiFreqFromKeyNum(i), name = scale.getMidNoteNameFromKeyNum(i), vol = 0.0f, vol_vel = 0.0f });
+            }
+
+            soundOut.Initialize(mixer.ToWaveSource());
+            soundOut.Play();
+        }
+
+        public void updatePlayingMidi()
         {
 
         }

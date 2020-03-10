@@ -18,7 +18,8 @@ namespace AudioExplorer
         static void Main(string[] args)
         {
 
-            MIDI.MIDIData data = MIDI.MIDIFileReader.readFile(@"..\..\sampledata\MIDI_sample.mid");
+            //MIDI.MIDIData data = MIDI.MIDIFileReader.readFile(@"..\..\sampledata\MIDI_sample.mid");
+            MIDI.MIDIData data = MIDI.MIDIFileReader.readFile(@"..\..\sampledata\teddybear.mid");
 
             MIDI.MIDIPlayer player = new MIDI.MIDIPlayer(data);
             Console.WriteLine("Track 0 events:");

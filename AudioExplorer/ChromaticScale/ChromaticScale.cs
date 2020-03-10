@@ -53,7 +53,7 @@ namespace AudioExplorer.ChromaticScale
             {
                 throw new ArgumentOutOfRangeException("Specified MIDI key index is out of expected range");
             }
-            if(keynum >= 0 && keynum < 8)
+            if(keynum >= 0 && keynum <= 8)
             {
                 return notes[keynum + 3].base_freq / 64;
             }
@@ -99,6 +99,19 @@ namespace AudioExplorer.ChromaticScale
             }
 
             return 0;
+        }
+
+        public string getMidNoteNameFromKeyNum(int keynum)
+        {
+            if (keynum < 0 || keynum > 128)
+            {
+                throw new ArgumentOutOfRangeException("Specified MIDI key index is out of expected range");
+            }
+            if(keynum < 21)
+            {
+                return "UNKNOWN";
+            }
+            return String.Format("{0}{1}", notes[(keynum + 3) % 12].identifier[0], (keynum - 12) / 12);
         }
     }
     
