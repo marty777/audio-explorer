@@ -99,16 +99,15 @@ namespace AudioExplorer.MIDI
                             switch (the_event.midieventtype)
                             {
                                 case MIDIEventType.NoteOn:
-                                    audioController.startPlayingMIDIKey((int)the_event.val2, (float)the_event.val3);
+                                    audioController.startPlayingMIDIKey((int)the_event.val2, (float)the_event.val3 * 0.0001f);
                                     Console.WriteLine("NoteOn {0} {1}", the_event.val2, the_event.val3);
                                     break;
                                 case MIDIEventType.NoteOff:
-                                    audioController.stopPlayingMIDIKey((int)the_event.val2, (float)the_event.val3);
+                                    audioController.stopPlayingMIDIKey((int)the_event.val2, (float)the_event.val3 * 0.0001f);
                                     Console.WriteLine("NoteOff {0} {1}", the_event.val2, the_event.val3);
                                     break;
                                 default:
                                     break;
-
                             }
                         }
                     }

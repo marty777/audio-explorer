@@ -47,15 +47,17 @@ namespace AudioExplorer.Audio
                     _sampleVolumes.Add(1.0f);
                 }
             }
-            
+            Console.WriteLine("Mixer sources {0}", _sampleSources.Count);
         }
 
-        public void setSourceVolume(int index, float volume)
+        public void setSourceVolume(ISampleSource source, float volume)
         {
-            if (index < 0 || index >= _sampleVolumes.Count)
+            if(!_sampleSources.Contains(source))
             {
-                throw new IndexOutOfRangeException(String.Format("Index {0} outside range [0..{1}]", index, _sampleVolumes.Count));
+                throw new ArgumentException("Cannot update source volume: Source not present in mixer");
             }
+            int index = _sampleSources.IndexOf(source);
+
             if(volume < 0)
             {
                 _sampleVolumes[index] = 0.0f;

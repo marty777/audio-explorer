@@ -17,6 +17,7 @@ namespace AudioExplorer.Audio
     {
         public double freq { get; set; }
         public string name { get; set; }
+        public ISampleSource source;
         public float vol { get; set; }
         public float vol_vel { get; set; }
     }
@@ -69,6 +70,9 @@ namespace AudioExplorer.Audio
         public void startPlayingMIDIKey(int midikey, float vel)
         {
             midiKeys[midikey].vol_vel = vel;
+            mixer.AddSource(midiKeys[midikey].source);
+            mixer.setSourceVolume(midiKeys[midikey].source, midiKeys[midikey].vol);
+            
         }
 
         public void stopPlayingMIDIKey(int midikey, float vel)
@@ -95,7 +99,10 @@ namespace AudioExplorer.Audio
                     midiKeys[i].vol = 0.0f;
                     midiKeys[i].vol_vel = 0.0f;
                 }
-                mixer.setSourceVolume(i, midiKeys[i].vol);
+                mixer.setSourceVolume(midiKeys[i].source, midiKeys[i].vol);
+                if(midiKeys[i].vol == 0.0f) {
+                    mixer.RemoveSource(midiKeys[i].source);
+                }
             }
         }
 
@@ -107,13 +114,14 @@ namespace AudioExplorer.Audio
                 Console.WriteLine("Adding {0} - freq {1} name {2} to mixer", i, scale.getMidiFreqFromKeyNum(i), scale.getMidNoteNameFromKeyNum(i));
                 WaveGenerator generator = new WaveGenerator(WaveGenerator.WaveType.TriangleWave, scale.getMidiFreqFromKeyNum(i), 1.0, 0.0);
                 VolumeSource vol;
-                mixer.AddSource(
-                    generator.ToWaveSource()
+                ISampleSource source = generator.ToWaveSource()
                     .AppendSource(x => new DmoChannelResampler(x, monoToStereoChannelMatrix, sampleRate))
-                    .AppendSource(x => new VolumeSource(x.ToSampleSource()), out vol)
-                    );
-                mixer.setSourceVolume(i, 0.0f);
-                midiKeys.Add(new MidiKeyPlaying { freq = scale.getMidiFreqFromKeyNum(i), name = scale.getMidNoteNameFromKeyNum(i), vol = 0.0f, vol_vel = 0.0f });
+                    .AppendSource(x => new VolumeSource(x.ToSampleSource()), out vol);
+                //mixer.AddSource(
+                //    source
+                //    );
+                //mixer.setSourceVolume(i, 0.0f);
+                midiKeys.Add(new MidiKeyPlaying { freq = scale.getMidiFreqFromKeyNum(i), name = scale.getMidNoteNameFromKeyNum(i), vol = 0.0f, vol_vel = 0.0f, source=source });
             }
 
             soundOut.Initialize(mixer.ToWaveSource());
