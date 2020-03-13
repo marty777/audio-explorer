@@ -110,12 +110,13 @@ namespace AudioExplorer.SampleSource
 
             double phaseinc = (1.0 / WaveFormat.SampleRate);
             float t = 0;
+            float sine = 0;
             for (int i = offset; i < count; i++)
             {
                 switch(this.waveform)
                 {
                     case WaveType.SineWave:
-                        float sine = (float)(Amplitude * Math.Sin(Frequency * Phase * Math.PI * 2));
+                        sine = (float)(Amplitude * Math.Sin(Frequency * Phase * Math.PI * 2));
                         buffer[i] = sine;
                         break;
                     case WaveType.SquareWave:

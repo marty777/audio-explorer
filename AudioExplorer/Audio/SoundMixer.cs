@@ -127,16 +127,12 @@ namespace AudioExplorer.Audio
                         int read = sampleSource.Read(_mixerBuffer, 0, count);
                         for (int i = offset, n = 0; n < read; i++, n++)
                         {
-                            //if (numberOfStoredSamples <= i)
-                            //    buffer[i] = (m == 1 ? -_mixerBuffer[n] : _mixerBuffer[n]);
-                            //else
-                            //    buffer[i] += (m == 1 ? -_mixerBuffer[n] : _mixerBuffer[n]);
-
-                            //if (numberOfStoredSamples <= i)
-                            //    buffer[i] = (m == 1 ? -_mixerBuffer[n] : _mixerBuffer[n]);
-                            //else
-                                buffer[i] +=  _mixerBuffer[n] * _sampleVolumes[m];
-                        }
+                            if (numberOfStoredSamples <= i)
+                                buffer[i] = _mixerBuffer[n] *_sampleVolumes[m]; 
+                            else
+                                buffer[i] += _mixerBuffer[n] *_sampleVolumes[m];
+                            
+                }
                         if (read > numberOfStoredSamples)
                             numberOfStoredSamples = read;
 
