@@ -112,7 +112,7 @@ namespace AudioExplorer.Audio
             for(int i = 0; i <= 128; i++)
             {
                 Console.WriteLine("Adding {0} - freq {1} name {2} to mixer", i, scale.getMidiFreqFromKeyNum(i), scale.getMidNoteNameFromKeyNum(i));
-                WaveGenerator generator = new WaveGenerator(WaveGenerator.WaveType.TriangleWave, scale.getMidiFreqFromKeyNum(i), 1.0, 0.0);
+                WaveGenerator generator = new WaveGenerator(WaveGenerator.WaveType.SquareWave, scale.getMidiFreqFromKeyNum(i), 1.0, 0.0);
                 VolumeSource vol;
                 ISampleSource source = generator.ToWaveSource()
                     .AppendSource(x => new DmoChannelResampler(x, monoToStereoChannelMatrix, sampleRate))

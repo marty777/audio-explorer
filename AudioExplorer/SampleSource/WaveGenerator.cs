@@ -19,6 +19,8 @@ namespace AudioExplorer.SampleSource
             TriangleWave,
             SawtoothWave,
             InverseSawtoothWave,
+            PulseWaveHalf,
+            PulseWaveQuarter,
         }
 
         /// <summary>
@@ -148,6 +150,28 @@ namespace AudioExplorer.SampleSource
                     case WaveType.InverseSawtoothWave:
                         t = (float)((Phase * Frequency) % 1.0);
                         buffer[i] = (float)(Amplitude - (2 * Amplitude * t));
+                        break;
+                    case WaveType.PulseWaveHalf:
+                        t = (float)((Phase * Frequency) % 1.0);
+                        if (t < 0.25)
+                        {
+                            buffer[i] = (float)-Amplitude;
+                        }
+                        else
+                        {
+                            buffer[i] = (float)(Amplitude);
+                        }
+                        break;
+                    case WaveType.PulseWaveQuarter:
+                        t = (float)((Phase * Frequency) % 1.0);
+                        if (t < 0.125)
+                        {
+                            buffer[i] = (float)-Amplitude;
+                        }
+                        else
+                        {
+                            buffer[i] = (float)(Amplitude);
+                        }
                         break;
                     default:
                         buffer[i] = 0;
