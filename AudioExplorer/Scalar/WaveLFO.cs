@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AudioExplorer.LFO
+namespace AudioExplorer.Scalar
 {
-    class WaveLFO : LFO
+    class WaveLFO : Scalar
     {
 
         public enum WaveLFOType

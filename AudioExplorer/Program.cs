@@ -10,6 +10,8 @@ using CSCore.SoundOut;
 using CSCore.Streams;
 using AudioExplorer.Audio;
 using AudioExplorer.SampleSource;
+using AudioExplorer.SampleProcessor;
+using AudioExplorer.Scalar;
 
 namespace AudioExplorer
 {
@@ -17,6 +19,11 @@ namespace AudioExplorer
     {
         static void Main(string[] args)
         {
+
+            WaveFormat waveFormat = new WaveFormat(44100, 16, 1);
+            WaveLFO lfo = new WaveLFO(WaveLFO.WaveLFOType.SineLFOWave, waveFormat.SampleRate, 10, 0.6, 0, 0.1);
+            WaveGenerator generator = new WaveGenerator(WaveGenerator.WaveType.SineWave, 261, 1, 0); // approximately middle c
+            VolumeModulator volumeMod = new VolumeModulator(waveFormat, generator, lfo);            
 
             MIDI.MIDIData data = MIDI.MIDIFileReader.readFile(@"..\..\sampledata\MIDI_sample.mid");
 

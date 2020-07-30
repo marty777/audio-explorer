@@ -50,13 +50,15 @@
     <Compile Include="Audio\AudioController.cs" />
     <Compile Include="Audio\SoundMixer.cs" />
     <Compile Include="ChromaticScale\ChromaticScale.cs" />
-    <Compile Include="LFO\LFO.cs" />
-    <Compile Include="LFO\WaveLFO.cs" />
+    <Compile Include="SampleProcessor\VolumeModulator.cs" />
+    <Compile Include="Scalar\Scalar.cs" />
+    <Compile Include="Scalar\WaveLFO.cs" />
     <Compile Include="MIDI\MIDIData.cs" />
     <Compile Include="MIDI\MIDIFileReader.cs" />
     <Compile Include="MIDI\MIDIPlayer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SampleProcessor\SampleProcessor.cs" />
     <Compile Include="SampleSource\SawtoothGenerator.cs" />
     <Compile Include="SampleSource\SquareGenerator.cs" />
     <Compile Include="SampleSource\TriangleGenerator.cs" />
@@ -66,9 +68,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="SampleFunction\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

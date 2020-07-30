@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 // LFOs take in a time offset and produce a value in [-1..1]
-namespace AudioExplorer.LFO
+namespace AudioExplorer.Scalar
 {
     /// <summary>
-    ///     Reads a sequence of samples from the <see cref="LFO" />.
+    ///     Reads a sequence of samples from the <see cref="Scalar" />.
     /// </summary>
     /// <param name="buffer">
     ///     An array of floats. When this method returns, the <paramref name="buffer" /> contains the specified
@@ -21,7 +21,7 @@ namespace AudioExplorer.LFO
     /// </param>
     /// <param name="count">The maximum number of samples to read from the current source.</param>
     /// <returns>The total number of samples read into the buffer.</returns>
-    abstract class LFO
+    abstract class Scalar
     {
         public const float LFO_LO = -1;
         public const float LFO_HI = 1;
@@ -42,18 +42,5 @@ namespace AudioExplorer.LFO
             return value;
         }
 
-        // clamps value between low and high inclusive.
-        public virtual float Clamp(float value, float low, float high)
-        {
-            if (value < low)
-            {
-                return low;
-            } 
-            else if (value > high)
-            {
-                return high;
-            }
-            return value;
-        }
     }
 }
