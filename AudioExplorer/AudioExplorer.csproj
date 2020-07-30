@@ -50,6 +50,8 @@
     <Compile Include="Audio\AudioController.cs" />
     <Compile Include="Audio\SoundMixer.cs" />
     <Compile Include="ChromaticScale\ChromaticScale.cs" />
+    <Compile Include="LFO\LFO.cs" />
+    <Compile Include="LFO\WaveLFO.cs" />
     <Compile Include="MIDI\MIDIData.cs" />
     <Compile Include="MIDI\MIDIFileReader.cs" />
     <Compile Include="MIDI\MIDIPlayer.cs" />
@@ -63,6 +65,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="SampleFunction\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

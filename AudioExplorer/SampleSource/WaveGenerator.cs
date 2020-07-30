@@ -115,7 +115,7 @@ namespace AudioExplorer.SampleSource
             float sine = 0;
             for (int i = offset; i < count; i++)
             {
-                switch(this.waveform)
+                switch (this.waveform)
                 {
                     case WaveType.SineWave:
                         sine = (float)(Amplitude * Math.Sin(Frequency * Phase * Math.PI * 2));
@@ -178,7 +178,7 @@ namespace AudioExplorer.SampleSource
                         break;
 
                 }
-               
+
                 Phase += phaseinc;
             }
 
