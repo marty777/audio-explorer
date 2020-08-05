@@ -11,7 +11,6 @@ namespace AudioExplorer.Scalar
 
         public enum WaveLFOType
         {
-            ConstantLFOWave,
             SineLFOWave,
             SquareLFOWave,
             TriangleLFOWave,
@@ -25,13 +24,13 @@ namespace AudioExplorer.Scalar
         /// <summary>
         /// Gets or sets the frequency of the oscillator.
         /// </summary>
-        public double Frequency
+        public Scalar Frequency
         {
             get { return _frequency; }
             set
             {
-                if (value <= 0)
-                    throw new ArgumentOutOfRangeException("value");
+                if (value == null)
+                    throw new ArgumentNullException("value");
                 _frequency = value;
             }
         }
@@ -39,38 +38,48 @@ namespace AudioExplorer.Scalar
         /// <summary>
         /// Gets or sets the amplitude of the oscillator.
         /// </summary>
-        public double Amplitude
+        public Scalar Amplitude
         {
             get { return _amplitude; }
             set
             {
-                if (value < 0 || value > 1)
-                    throw new ArgumentOutOfRangeException("value");
+                if (value == null)
+                    throw new ArgumentNullException("value");
                 _amplitude = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets the phase of the oscillator.
+        /// Gets or sets the starting phase of the oscillator.
         /// </summary>
-        public double Phase { get; set; }
-
-        /// <summary>
-        /// Gets or sets the offset from zero of the oscillator wave.
-        /// </summary>
-        public double Constant
+        public Scalar PhaseOffset
         {
-            get { return _constant; }
+            get { return _phaseoffset; }
             set
             {
-                if (value < -1 || value > 1)
-                    throw new ArgumentOutOfRangeException("value");
-                _constant = value;
+                if (value == null)
+                    throw new ArgumentNullException("value");
+                _phaseoffset = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets the sample rate of the oscillator
+        /// Gets or sets the offset from zero of the oscillator wave.
+        /// </summary>
+        public Scalar Origin
+        {
+            get { return _origin; }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+                _origin = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the sample rate of the oscillator. THis value should probably not be modified after initialization
+        /// although it shouldn't break anything directly.
         /// </summary>
         public int SampleRate
         {
@@ -89,13 +98,15 @@ namespace AudioExplorer.Scalar
         public WaveLFOType waveform { get; set; }
 
         
-        private double _frequency;
-        private double _amplitude;
-        private double _constant;
+        private Scalar _frequency;
+        private Scalar _amplitude;
+        private Scalar _origin;
+        private Scalar _phaseoffset;
+        private float phase;
         private int _samplerate;
 
         public WaveLFO()
-            : this(WaveLFOType.SineLFOWave, 44100, 1000, 0.5, 0, 0)
+            : this(WaveLFOType.SineLFOWave, 44100, new ConstantScalar(1000), new ConstantScalar(0.5), new ConstantScalar(0), new ConstantScalar(0))
         {
         }
 
@@ -107,21 +118,22 @@ namespace AudioExplorer.Scalar
         /// <param name="frequency">Specifies the frequency of the oscillator in Hz. Use a value greater than 0.</param>
         /// <param name="amplitude">Specifies the amplitude of the oscillator. Use a value between 0 and 1.</param>
         /// <param name="phase">Specifies the initial phase. Use a value between 0 and 1.</param>
-        /// <param name="constant">Specifies a constant offset from zero. Use a value between -1 and 1.</param>
-        public WaveLFO(WaveLFOType wavetype, int samplerate, double frequency, double amplitude, double phase, double constant)
+        /// <param name="origin">Specifies an offset from zero on the amplitude axis. Use a value between -1 and 1. 
+        /// Note that computed values will be clamped to [-1,1] if the amplitude of the resulting waveform added to the offset exceeds those bounds</param>
+        public WaveLFO(WaveLFOType wavetype, int samplerate, Scalar frequency, Scalar amplitude, Scalar phase, Scalar origin)
         {
             SampleRate = samplerate;
             Frequency = frequency;
             Amplitude = amplitude;
-            Phase = phase;
-            Constant = constant;
+            PhaseOffset = phase;
+            Origin = origin;
             waveform = wavetype;
         }
 
         public override int Read(float[] buffer, int offset, int count)
         {
-            if (Phase > 1)
-                Phase = 0;
+            if (phase > 1)
+                phase = phase % 1.0f;
 
             double phaseinc = (1.0 / _samplerate);
             float t = 0;
@@ -131,7 +143,7 @@ namespace AudioExplorer.Scalar
                 switch (this.waveform)
                 {
                     case WaveLFOType.ConstantLFOWave:
-                        buffer[i] = (float)_constant;
+                        buffer[i] = (float)_constant.;
                         break;
                     case WaveLFOType.SineLFOWave:
                         sine = (float)(Amplitude * Math.Sin(Frequency * Phase * Math.PI * 2));
