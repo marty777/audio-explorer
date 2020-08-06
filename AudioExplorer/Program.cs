@@ -21,9 +21,17 @@ namespace AudioExplorer
         {
 
             WaveFormat waveFormat = new WaveFormat(44100, 16, 1);
-            WaveLFO lfo = new WaveLFO(WaveLFO.WaveLFOType.SineLFOWave, waveFormat.SampleRate, 10, 0.6, 0, 0.1);
-            WaveGenerator generator = new WaveGenerator(WaveGenerator.WaveType.SineWave, 261, 1, 0); // approximately middle c
-            VolumeModulator volumeMod = new VolumeModulator(waveFormat, generator, lfo);            
+            WaveLFO lfo = new WaveLFO(WaveLFO.WaveLFOType.SineLFOWave, waveFormat.SampleRate, new ConstantScalar(0.1f), new ConstantScalar(1.0f), new ConstantScalar(0), new ConstantScalar(0.0f));
+            WaveGenerator generator = new WaveGenerator(WaveGenerator.WaveType.SineWave, 131, 1, 0); 
+            VolumeModulator volumeMod = new VolumeModulator(waveFormat, generator, lfo);
+
+            BasicAudioController basicAudioController = new BasicAudioController(GetSoundOut(), 1, 44100);
+            basicAudioController.addSource((ISampleSource)volumeMod);
+            basicAudioController.startPlaying();
+
+            Console.ReadKey();
+            basicAudioController.stopPlaying();
+            return;
 
             MIDI.MIDIData data = MIDI.MIDIFileReader.readFile(@"..\..\sampledata\MIDI_sample.mid");
 
@@ -63,7 +71,7 @@ namespace AudioExplorer
             Console.ReadKey();
             return;
 
-            AudioController audioController = new AudioController(GetSoundOut());
+            MIDIAudioController audioController = new MIDIAudioController(GetSoundOut());
             ChromaticScale.ChromaticScale scale = new ChromaticScale.ChromaticScale();
             audioController.startPlaying();
             SampleSource.WaveGenerator.WaveType wavetype = WaveGenerator.WaveType.SineWave;

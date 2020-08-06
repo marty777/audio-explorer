@@ -22,7 +22,7 @@ namespace AudioExplorer.Audio
         public float vol_vel { get; set; }
     }
 
-    class AudioController
+    class MIDIAudioController
     {
         private List<double> frequencies;
         private List<MidiKeyPlaying> midiKeys { get; set; }
@@ -31,7 +31,7 @@ namespace AudioExplorer.Audio
         private ChannelMatrix monoToStereoChannelMatrix;
         private ISoundOut soundOut;
 
-        public AudioController(ISoundOut programSoundOut)
+        public MIDIAudioController(ISoundOut programSoundOut)
         {
             frequencies = new List<double>();
             mixer = new SoundMixer(2, sampleRate)

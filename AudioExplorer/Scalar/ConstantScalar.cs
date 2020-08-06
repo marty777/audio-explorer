@@ -10,7 +10,8 @@ namespace AudioExplorer.Scalar
     {
         private float _val;
 
-        public float Value {
+        public float Value
+        {
             get { return _val; }
             set
             {
@@ -34,4 +35,5 @@ namespace AudioExplorer.Scalar
 
             return count;
         }
+    }
 }

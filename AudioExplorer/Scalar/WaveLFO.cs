@@ -106,7 +106,7 @@ namespace AudioExplorer.Scalar
         private int _samplerate;
 
         public WaveLFO()
-            : this(WaveLFOType.SineLFOWave, 44100, new ConstantScalar(1000), new ConstantScalar(0.5), new ConstantScalar(0), new ConstantScalar(0))
+            : this(WaveLFOType.SineLFOWave, 44100, new ConstantScalar(1000), new ConstantScalar(0.5f), new ConstantScalar(0), new ConstantScalar(0))
         {
         }
 
@@ -135,70 +135,84 @@ namespace AudioExplorer.Scalar
             if (phase > 1)
                 phase = phase % 1.0f;
 
-            double phaseinc = (1.0 / _samplerate);
+            float phaseinc = (1.0f / _samplerate);
             float t = 0;
             float sine = 0;
+            float[] frequencysamples = new float[buffer.Length];
+            float[] amplitudesamples = new float[buffer.Length];
+            float[] phaseoffsetsamples = new float[buffer.Length];
+            float[] originsamples = new float[buffer.Length];
+            Frequency.Read(frequencysamples, offset, count);
+            Amplitude.Read(amplitudesamples, offset, count);
+            PhaseOffset.Read(phaseoffsetsamples, offset, count);
+            Origin.Read(originsamples, offset, count);
+            float freq = 0;
+            float amp = 0;
+            float offsetphase = 0;
+            float origin = 0;
+            
             for (int i = offset; i < count; i++)
             {
+                freq = frequencysamples[i];
+                amp = amplitudesamples[i];
+                offsetphase = (phase + phaseoffsetsamples[i]) % 1.0f;
+                origin = originsamples[i];
                 switch (this.waveform)
                 {
-                    case WaveLFOType.ConstantLFOWave:
-                        buffer[i] = (float)_constant.;
-                        break;
                     case WaveLFOType.SineLFOWave:
-                        sine = (float)(Amplitude * Math.Sin(Frequency * Phase * Math.PI * 2));
-                        buffer[i] = LFOClamp(sine + (float)_constant);
+                        sine = (float)(amp * Math.Sin(freq * offsetphase * Math.PI * 2));
+                        buffer[i] = LFOClamp(sine + origin);
                         break;
                     case WaveLFOType.SquareLFOWave:
-                        t = (float)((Phase * Frequency) % 1.0);
+                        t = (float)((offsetphase * freq) % 1.0);
                         if (t < 0.5)
                         {
-                            buffer[i] = LFOClamp((float)(_constant - Amplitude));
+                            buffer[i] = LFOClamp((float)(origin - amp));
                         }
                         else
                         {
-                            buffer[i] = LFOClamp((float)(_constant + Amplitude));
+                            buffer[i] = LFOClamp((float)(origin + amp));
                         }
                         break;
                     case WaveLFOType.TriangleLFOWave:
-                        t = (float)((Phase * Frequency) % 1.0);
+                        t = (float)((offsetphase * freq) % 1.0);
                         if (t <= 0.5)
                         {
-                            buffer[i] = LFOClamp((float)(_constant - Amplitude + (4 * Amplitude * t)));
+                            buffer[i] = LFOClamp((float)(origin - amp + (4 * amp * t)));
                         }
                         else
                         {
-                            buffer[i] = LFOClamp((float)(_constant + Amplitude - (4 * Amplitude * (t - 0.5))));
+                            buffer[i] = LFOClamp((float)(origin + amp - (4 * amp * (t - 0.5))));
                         }
                         break;
                     case WaveLFOType.SawtoothLFOWave:
-                        t = (float)((Phase * Frequency) % 1.0);
-                        buffer[i] = LFOClamp((float)(_constant - Amplitude + (2 * Amplitude * t)));
+                        t = (float)((offsetphase * freq) % 1.0);
+                        buffer[i] = LFOClamp((float)(origin - amp + (2 * amp * t)));
                         break;
                     case WaveLFOType.InverseSawtoothLFOWave:
-                        t = (float)((Phase * Frequency) % 1.0);
-                        buffer[i] = LFOClamp((float)(_constant + Amplitude - (2 * Amplitude * t)));
+                        t = (float)((offsetphase * freq) % 1.0);
+                        buffer[i] = LFOClamp((float)(origin + amp - (2 * amp * t)));
                         break;
                     case WaveLFOType.PulseLFOWaveHalf:
-                        t = (float)((Phase * Frequency) % 1.0);
+                        t = (float)((offsetphase * freq) % 1.0);
                         if (t < 0.25)
                         {
-                            buffer[i] = LFOClamp((float)(_constant - Amplitude));
+                            buffer[i] = LFOClamp((float)(origin - amp));
                         }
                         else
                         {
-                            buffer[i] = LFOClamp((float)(_constant + Amplitude));
+                            buffer[i] = LFOClamp((float)(origin + amp));
                         }
                         break;
                     case WaveLFOType.PulseLFOWaveQuarter:
-                        t = (float)((Phase * Frequency) % 1.0);
+                        t = (float)((offsetphase * freq) % 1.0);
                         if (t < 0.125)
                         {
-                            buffer[i] = LFOClamp((float)(_constant - Amplitude));
+                            buffer[i] = LFOClamp((float)(origin - amp));
                         }
                         else
                         {
-                            buffer[i] = LFOClamp((float)(_constant + Amplitude));
+                            buffer[i] = LFOClamp((float)(origin + amp));
                         }
                         break;
                     default:
@@ -207,7 +221,7 @@ namespace AudioExplorer.Scalar
 
                 }
 
-                Phase += phaseinc;
+                phase += phaseinc;
             }
 
             return count;

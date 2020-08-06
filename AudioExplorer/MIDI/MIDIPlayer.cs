@@ -86,7 +86,7 @@ namespace AudioExplorer.MIDI
             UInt64 ticks = 0; // ticks are in microseconds
             int event_index = 0;
             UInt64 curr_ticks = data.tracks[trackIndex].events[0].delta;
-            AudioController audioController = new AudioController(GetSoundOut());
+            MIDIAudioController audioController = new MIDIAudioController(GetSoundOut());
             audioController.startPlayingMidi();
             while (event_index < data.tracks[trackIndex].events.Count)
             {

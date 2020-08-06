@@ -11,7 +11,7 @@ namespace AudioExplorer.SampleProcessor
     /// Takes input from one or more iReadableAudioSources and performs operations on them
     /// before producing a single audio outputs. The base class for filters, mixing, etc.
     /// </summary>
-    public abstract class SampleProcessor : IReadableAudioSource<float>
+    public abstract class SampleProcessor : ISampleSource
     {
 
         protected readonly WaveFormat _waveFormat;

@@ -47,10 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Audio\AudioController.cs" />
+    <Compile Include="Audio\MIDIAudioController.cs" />
+    <Compile Include="Audio\BasicAudioController.cs" />
     <Compile Include="Audio\SoundMixer.cs" />
     <Compile Include="ChromaticScale\ChromaticScale.cs" />
     <Compile Include="SampleProcessor\VolumeModulator.cs" />
+    <Compile Include="Scalar\ConstantScalar.cs" />
     <Compile Include="Scalar\Scalar.cs" />
     <Compile Include="Scalar\WaveLFO.cs" />
     <Compile Include="MIDI\MIDIData.cs" />
