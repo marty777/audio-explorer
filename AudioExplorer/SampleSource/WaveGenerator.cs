@@ -85,7 +85,7 @@ namespace AudioExplorer.SampleSource
 
             Frequency = frequency;
             Amplitude = amplitude;
-            Phase = phase;
+            Phase = phase % (1.0/Frequency);
             waveform = wavetype;
 
             _waveFormat = new WaveFormat(44100, 32, 1, AudioEncoding.IeeeFloat);
@@ -107,8 +107,11 @@ namespace AudioExplorer.SampleSource
         /// <returns>The total number of samples read into the buffer.</returns>
         public int Read(float[] buffer, int offset, int count)
         {
-            if (Phase > 1)
-                Phase = 0;
+
+            if (Phase > Frequency)
+            {
+                Phase = Phase % (1.0 / Frequency);
+            }
 
             double phaseinc = (1.0 / WaveFormat.SampleRate);
             float t = 0;
@@ -178,7 +181,7 @@ namespace AudioExplorer.SampleSource
                         break;
 
                 }
-
+                
                 Phase += phaseinc;
             }
 

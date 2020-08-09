@@ -21,8 +21,10 @@ namespace AudioExplorer
         {
 
             WaveFormat waveFormat = new WaveFormat(44100, 16, 1);
-            WaveLFO lfo = new WaveLFO(WaveLFO.WaveLFOType.SineLFOWave, waveFormat.SampleRate, new ConstantScalar(0.1f), new ConstantScalar(1.0f), new ConstantScalar(0), new ConstantScalar(0.0f));
-            WaveGenerator generator = new WaveGenerator(WaveGenerator.WaveType.SineWave, 131, 1, 0); 
+            WaveLFO freqLFO = new WaveLFO(WaveLFO.WaveLFOType.SineLFOWave, waveFormat.SampleRate, new ConstantScalar(20.0f), new ConstantScalar(20.0f), new ConstantScalar(0), new ConstantScalar(50.0f)); // vary between 4 and 8 HZ with period 10 sec
+            WaveLFO lfo = new WaveLFO(WaveLFO.WaveLFOType.SineLFOWave, waveFormat.SampleRate, freqLFO, new ConstantScalar(0.2f), new ConstantScalar(0), new ConstantScalar(0.5f));
+           
+            WaveGenerator generator = new WaveGenerator(WaveGenerator.WaveType.SineWave, 120.1f, 1, 115.0f); 
             VolumeModulator volumeMod = new VolumeModulator(waveFormat, generator, lfo);
 
             BasicAudioController basicAudioController = new BasicAudioController(GetSoundOut(), 1, 44100);

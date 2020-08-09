@@ -132,9 +132,6 @@ namespace AudioExplorer.Scalar
 
         public override int Read(float[] buffer, int offset, int count)
         {
-            if (phase > 1)
-                phase = phase % 1.0f;
-
             float phaseinc = (1.0f / _samplerate);
             float t = 0;
             float sine = 0;
@@ -155,7 +152,11 @@ namespace AudioExplorer.Scalar
             {
                 freq = frequencysamples[i];
                 amp = amplitudesamples[i];
-                offsetphase = (phase + phaseoffsetsamples[i]) % 1.0f;
+                if(phase > freq)
+                {
+                    phase = phase % (1.0f / freq);
+                }
+                offsetphase = (phase + phaseoffsetsamples[i]);
                 origin = originsamples[i];
                 switch (this.waveform)
                 {
@@ -184,6 +185,7 @@ namespace AudioExplorer.Scalar
                         {
                             buffer[i] = LFOClamp((float)(origin + amp - (4 * amp * (t - 0.5))));
                         }
+                       
                         break;
                     case WaveLFOType.SawtoothLFOWave:
                         t = (float)((offsetphase * freq) % 1.0);

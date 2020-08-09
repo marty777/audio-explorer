@@ -31,14 +31,14 @@ namespace AudioExplorer.Scalar
         // clamps value between LFO_LOW and FLO_HIGH inclusive.
         public virtual float LFOClamp(float value)
         {
-            if (value < LFO_LO)
-            {
-                return LFO_LO;
-            }
-            else if (value > LFO_HI)
-            {
-                return LFO_HI;
-            }
+            //if (value < LFO_LO)
+            //{
+            //    return LFO_LO;
+            //}
+            //else if (value > LFO_HI)
+            //{
+            //    return LFO_HI;
+            //}
             return value;
         }
 

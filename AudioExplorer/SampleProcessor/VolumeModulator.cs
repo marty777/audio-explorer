@@ -28,8 +28,9 @@ namespace AudioExplorer.SampleProcessor
             float amplitude;
             for (int i = offset; i < count; i++)
             {
-                amplitude = (0.5f * scalarBuffer[i]) + 1; // map from [-1,1] to [0,1]
+                amplitude = scalarBuffer[i];//(0.5f * scalarBuffer[i]) + 0.5f; // map from [-1,1] to [0,1]
                 buffer[i] = amplitude * sourceBuffer[i];
+                
             }
             return count;
         }
