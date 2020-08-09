@@ -23,12 +23,16 @@ namespace AudioExplorer
             WaveFormat waveFormat = new WaveFormat(44100, 16, 1);
             WaveLFO freqLFO = new WaveLFO(WaveLFO.WaveLFOType.SineLFOWave, waveFormat.SampleRate, new ConstantScalar(20.0f), new ConstantScalar(20.0f), new ConstantScalar(0), new ConstantScalar(50.0f)); // vary between 4 and 8 HZ with period 10 sec
             WaveLFO lfo = new WaveLFO(WaveLFO.WaveLFOType.SineLFOWave, waveFormat.SampleRate, freqLFO, new ConstantScalar(0.2f), new ConstantScalar(0), new ConstantScalar(0.5f));
-           
+
+            WaveLFO freqOsc = new WaveLFO(WaveLFO.WaveLFOType.SineLFOWave, waveFormat.SampleRate, new ConstantScalar(0.1f), new ConstantScalar(50.0f), new ConstantScalar(0), new ConstantScalar(160.0f));
+            WaveLFO variableFreq = new WaveLFO(WaveLFO.WaveLFOType.SquareLFOWave, waveFormat.SampleRate, freqOsc, new ConstantScalar(2.0f), new ConstantScalar(0), new ConstantScalar(0));
+
             WaveGenerator generator = new WaveGenerator(WaveGenerator.WaveType.SineWave, 120.1f, 1, 115.0f); 
             VolumeModulator volumeMod = new VolumeModulator(waveFormat, generator, lfo);
+            ScalarPassthrough scalarPassthru = new ScalarPassthrough(waveFormat, variableFreq);
 
             BasicAudioController basicAudioController = new BasicAudioController(GetSoundOut(), 1, 44100);
-            basicAudioController.addSource((ISampleSource)volumeMod);
+            basicAudioController.addSource((ISampleSource)scalarPassthru);
             basicAudioController.startPlaying();
 
             Console.ReadKey();

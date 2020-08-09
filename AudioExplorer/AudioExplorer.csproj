@@ -51,6 +51,7 @@
     <Compile Include="Audio\BasicAudioController.cs" />
     <Compile Include="Audio\SoundMixer.cs" />
     <Compile Include="ChromaticScale\ChromaticScale.cs" />
+    <Compile Include="SampleProcessor\ScalarPassthrough.cs" />
     <Compile Include="SampleProcessor\VolumeModulator.cs" />
     <Compile Include="Scalar\ConstantScalar.cs" />
     <Compile Include="Scalar\Scalar.cs" />
