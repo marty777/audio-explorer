@@ -19,13 +19,7 @@ namespace AudioExplorer.SampleProcessor
 
         public override int Read(float[] buffer, int offset, int count)
         {
-            float[] sourceBuffer = new float[buffer.Length];
-            float[] scalarBuffer = new float[buffer.Length];
-            scalar.Read(scalarBuffer, offset, count);
-            for (int i = offset; i < count; i++)
-            {
-                buffer[i] = scalarBuffer[i];
-            }
+            scalar.Read(buffer, offset, count);
             return count;
         }
     }

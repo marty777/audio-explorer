@@ -55,7 +55,7 @@
     <Compile Include="SampleProcessor\VolumeModulator.cs" />
     <Compile Include="Scalar\ConstantScalar.cs" />
     <Compile Include="Scalar\Scalar.cs" />
-    <Compile Include="Scalar\WaveLFO.cs" />
+    <Compile Include="Scalar\Oscillator.cs" />
     <Compile Include="MIDI\MIDIData.cs" />
     <Compile Include="MIDI\MIDIFileReader.cs" />
     <Compile Include="MIDI\MIDIPlayer.cs" />

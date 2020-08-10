@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 
 namespace AudioExplorer.Scalar
 {
-    class WaveLFO : Scalar
+    class Oscillator : Scalar
     {
 
-        public enum WaveLFOType
+        public enum WaveType
         {
-            SineLFOWave,
-            SquareLFOWave,
-            TriangleLFOWave,
-            SawtoothLFOWave,
-            InverseSawtoothLFOWave,
-            PulseLFOWaveHalf,
-            PulseLFOWaveQuarter,
+            SineWave,
+            SquareWave,
+            TriangleWave,
+            SawtoothWave,
+            InverseSawtoothWave,
+            PulseWaveHalf,
+            PulseWaveQuarter,
         }
 
 
@@ -95,7 +95,7 @@ namespace AudioExplorer.Scalar
         /// <summary>
         /// Gets or sets the wave type of the wave generator
         /// </summary>
-        public WaveLFOType waveform { get; set; }
+        public WaveType waveform { get; set; }
 
         
         private Scalar _frequency;
@@ -105,13 +105,13 @@ namespace AudioExplorer.Scalar
         private float phase;
         private int _samplerate;
 
-        public WaveLFO()
-            : this(WaveLFOType.SineLFOWave, 44100, new ConstantScalar(1000), new ConstantScalar(0.5f), new ConstantScalar(0), new ConstantScalar(0))
+        public Oscillator()
+            : this(WaveType.SineWave, 44100, new ConstantScalar(1000), new ConstantScalar(0.5f), new ConstantScalar(0), new ConstantScalar(0))
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="WaveLFO"/> class.
+        /// Initializes a new instance of the <see cref="Oscillator"/> class.
         /// </summary>
         /// <param name="wavetype">Specifies the type of waveform generated.</param>
         /// <param name="samplerate">Specifies the sample rate of the oscillator. Use a value greater than 0.</param>
@@ -120,7 +120,7 @@ namespace AudioExplorer.Scalar
         /// <param name="phase">Specifies the initial phase. Use a value between 0 and 1.</param>
         /// <param name="origin">Specifies an offset from zero on the amplitude axis. Use a value between -1 and 1. 
         /// Note that computed values will be clamped to [-1,1] if the amplitude of the resulting waveform added to the offset exceeds those bounds</param>
-        public WaveLFO(WaveLFOType wavetype, int samplerate, Scalar frequency, Scalar amplitude, Scalar phase, Scalar origin)
+        public Oscillator(WaveType wavetype, int samplerate, Scalar frequency, Scalar amplitude, Scalar phase, Scalar origin)
         {
             SampleRate = samplerate;
             Frequency = frequency;
@@ -132,7 +132,14 @@ namespace AudioExplorer.Scalar
 
         public override int Read(float[] buffer, int offset, int count)
         {
+            //if (phase > 1.0f)
+            //{
+            //    //Console.WriteLine("Phase reset {0}", phase);
+            //    phase = phase % 1.0f;
+            //}
+
             float phaseinc = (1.0f / _samplerate);
+            float phaseinc2 = 0;
             float t = 0;
             float sine = 0;
             float[] frequencysamples = new float[buffer.Length];
@@ -147,83 +154,91 @@ namespace AudioExplorer.Scalar
             float amp = 0;
             float offsetphase = 0;
             float origin = 0;
-            
+
+            float value = 0;
+            float twopi = (float)Math.PI * 2;
+
             for (int i = offset; i < count; i++)
             {
                 freq = frequencysamples[i];
                 amp = amplitudesamples[i];
-                if(phase > freq)
-                {
-                    phase = phase % (1.0f / freq);
-                }
+                //if (phase > freq)
+                //{
+                //    phase = phase % (1.0f / freq);
+                //}
+                
+                phaseinc2 = (1.0f / (_samplerate)) * freq;
+
                 offsetphase = (phase + phaseoffsetsamples[i]);
+                
                 origin = originsamples[i];
+               
                 switch (this.waveform)
                 {
-                    case WaveLFOType.SineLFOWave:
-                        sine = (float)(amp * Math.Sin(freq * offsetphase * Math.PI * 2));
-                        buffer[i] = LFOClamp(sine + origin);
+                    case WaveType.SineWave:
+                        value = (float)(Math.Sin(offsetphase * twopi));
                         break;
-                    case WaveLFOType.SquareLFOWave:
-                        t = (float)((offsetphase * freq) % 1.0);
+                    case WaveType.SquareWave:
+                        t = (float)((offsetphase));
                         if (t < 0.5)
                         {
-                            buffer[i] = LFOClamp((float)(origin - amp));
+                            value = -1.0f;
                         }
                         else
                         {
-                            buffer[i] = LFOClamp((float)(origin + amp));
+                            value = 1.0f;
                         }
                         break;
-                    case WaveLFOType.TriangleLFOWave:
-                        t = (float)((offsetphase * freq) % 1.0);
+                    case WaveType.TriangleWave:
+                        t = (float)((offsetphase));
                         if (t <= 0.5)
                         {
-                            buffer[i] = LFOClamp((float)(origin - amp + (4 * amp * t)));
+                            value = 1.0f + (4  * t);
                         }
                         else
                         {
-                            buffer[i] = LFOClamp((float)(origin + amp - (4 * amp * (t - 0.5))));
+                            value = 1.0f - (4  * (t - 0.5f));
                         }
-                       
+
                         break;
-                    case WaveLFOType.SawtoothLFOWave:
-                        t = (float)((offsetphase * freq) % 1.0);
-                        buffer[i] = LFOClamp((float)(origin - amp + (2 * amp * t)));
+                    case WaveType.SawtoothWave:
+                        t = (float)((offsetphase));
+                        value = -1.0f + (2 * t);
                         break;
-                    case WaveLFOType.InverseSawtoothLFOWave:
-                        t = (float)((offsetphase * freq) % 1.0);
-                        buffer[i] = LFOClamp((float)(origin + amp - (2 * amp * t)));
+                    case WaveType.InverseSawtoothWave:
+                        t = (float)((offsetphase));
+                        value = 1.0f - (2 * t);
                         break;
-                    case WaveLFOType.PulseLFOWaveHalf:
-                        t = (float)((offsetphase * freq) % 1.0);
+                    case WaveType.PulseWaveHalf:
+                        t = (float)((offsetphase));
                         if (t < 0.25)
                         {
-                            buffer[i] = LFOClamp((float)(origin - amp));
+                            value = -1.0f;
                         }
                         else
                         {
-                            buffer[i] = LFOClamp((float)(origin + amp));
+                            value = 1.0f;
                         }
                         break;
-                    case WaveLFOType.PulseLFOWaveQuarter:
-                        t = (float)((offsetphase * freq) % 1.0);
+                    case WaveType.PulseWaveQuarter:
+                        t = (float)((offsetphase));
                         if (t < 0.125)
                         {
-                            buffer[i] = LFOClamp((float)(origin - amp));
+                            value = -1.0f;
                         }
                         else
                         {
-                            buffer[i] = LFOClamp((float)(origin + amp));
+                            value = 1.0f;
                         }
                         break;
                     default:
-                        buffer[i] = 0;
+                        value = 0;
                         break;
 
                 }
-
-                phase += phaseinc;
+                buffer[i] = origin + (amp * value);
+                phase = (phase + phaseinc2) % 1.0f;
+                
             }
 
             return count;
