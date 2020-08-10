@@ -193,7 +193,7 @@ namespace AudioExplorer.Scalar
                         t = (float)((offsetphase));
                         if (t <= 0.5)
                         {
-                            value = 1.0f + (4  * t);
+                            value = -1.0f + (4  * t);
                         }
                         else
                         {
