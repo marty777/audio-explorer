@@ -52,10 +52,11 @@
     <Compile Include="Audio\SoundMixer.cs" />
     <Compile Include="ChromaticScale\ChromaticScale.cs" />
     <Compile Include="SampleProcessor\BiQuadFilter.cs" />
-    <Compile Include="SampleProcessor\HighBassFilter.cs" />
+    <Compile Include="SampleProcessor\HighPassFilter.cs" />
     <Compile Include="SampleProcessor\LowPassFilter.cs" />
     <Compile Include="SampleProcessor\ScalarPassthrough.cs" />
     <Compile Include="SampleProcessor\VolumeModulator.cs" />
+    <Compile Include="SampleSource\NoiseGenerator.cs" />
     <Compile Include="Scalar\ConstantScalar.cs" />
     <Compile Include="Scalar\Scalar.cs" />
     <Compile Include="Scalar\Oscillator.cs" />

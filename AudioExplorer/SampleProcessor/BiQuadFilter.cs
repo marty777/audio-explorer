@@ -10,6 +10,8 @@ namespace AudioExplorer.SampleProcessor
     // explanation and implementation of biquad filters taken from https://www.earlevel.com/main/2003/02/28/biquads/
     public abstract class BiQuadFilter : SampleProcessor
     {
+        private IReadableAudioSource<float> _source { get; set; }
+
         private double _frequency;
         private double _q;
         private double _gainDB;
@@ -64,19 +66,21 @@ namespace AudioExplorer.SampleProcessor
             }
         }
 
-        public BiQuadFilter(WaveFormat waveFormat, double frequency) : this(waveFormat, frequency, 1.0/Math.Sqrt(2))
+        public BiQuadFilter(WaveFormat waveFormat, double frequency, ISampleSource source) : this(waveFormat, frequency, 1.0/Math.Sqrt(2), source)
         {
 
         }
 
-        public BiQuadFilter(WaveFormat waveFormat, double frequency, double q) : base(waveFormat)
+        public BiQuadFilter(WaveFormat waveFormat, double frequency, double q, ISampleSource source) : base(waveFormat)
         {
-            Frequency = _frequency;
+            _source = source;
+            Frequency = frequency;
             Q = q;
             GainDB = 6;
             Z1 = 0;
             Z2 = 0;
         }
+        
 
         public float Process(float input)
         {
@@ -85,6 +89,17 @@ namespace AudioExplorer.SampleProcessor
             Z2 = input * A2 - B2 * o;
             return (float)o;
 
+        }
+
+        public override int Read(float[] buffer, int offset, int count)
+        {
+            float[] input = new float[buffer.Length];
+            _source.Read(input, offset, count);
+            for (int i = offset; i < count; i++)
+            {
+                buffer[i] = Process(input[i]);
+            }
+            return count;
         }
 
         protected abstract void ComputeCoefficients();

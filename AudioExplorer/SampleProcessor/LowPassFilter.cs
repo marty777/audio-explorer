@@ -9,7 +9,7 @@ namespace AudioExplorer.SampleProcessor
 {
     class LowPassFilter : BiQuadFilter
     {
-        public LowPassFilter(WaveFormat waveFormat, double frequency) : base(waveFormat, frequency)
+        public LowPassFilter(WaveFormat waveFormat, double frequency, ISampleSource source) : base(waveFormat, frequency, source)
         {
 
         }
