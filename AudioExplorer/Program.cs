@@ -22,8 +22,9 @@ namespace AudioExplorer
 
             WaveFormat waveFormat = new WaveFormat(44100, 16, 1);
             
-            Oscillator freqOsc = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.1f), new ConstantScalar(100.0f), new ConstantScalar(0), new ConstantScalar(220.0f));
-            Oscillator ampOsc = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(4.0f), new ConstantScalar(0.5f), new ConstantScalar(0), new ConstantScalar(0.5f));
+            Oscillator freqOsc = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.05f), new ConstantScalar(100.0f), new ConstantScalar(0), new ConstantScalar(220.0f));
+            Oscillator ampOscVel = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.05f), new ConstantScalar(8.0f), new ConstantScalar(0.5f), new ConstantScalar(8.0f));
+            Oscillator ampOsc = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, ampOscVel, new ConstantScalar(0.5f), new ConstantScalar(0), new ConstantScalar(0.5f));
             Oscillator variableFreq = new Oscillator(Oscillator.WaveType.SquareWave, waveFormat.SampleRate, freqOsc, ampOsc, new ConstantScalar(0), new ConstantScalar(0));
             
             ScalarPassthrough scalarPassthru = new ScalarPassthrough(waveFormat, variableFreq);
