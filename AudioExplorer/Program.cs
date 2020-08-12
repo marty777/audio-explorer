@@ -22,20 +22,22 @@ namespace AudioExplorer
 
             WaveFormat waveFormat = new WaveFormat(44100, 16, 1);
             
-            Oscillator freqOsc = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.05f), new ConstantScalar(100.0f), new ConstantScalar(0), new ConstantScalar(220.0f));
+            Oscillator freqOsc = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.05f), new ConstantScalar(100.0f), new ConstantScalar(0), new ConstantScalar(120.0f));
             Oscillator ampOscVel = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.05f), new ConstantScalar(8.0f), new ConstantScalar(0.5f), new ConstantScalar(8.0f));
-            Oscillator ampOsc = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, ampOscVel, new ConstantScalar(0.5f), new ConstantScalar(0), new ConstantScalar(0.5f));
+            Oscillator ampOsc = new Oscillator(Oscillator.WaveType.SawtoothWave, waveFormat.SampleRate, ampOscVel, new ConstantScalar(0.5f), new ConstantScalar(0), new ConstantScalar(0.5f));
             Oscillator variableFreq = new Oscillator(Oscillator.WaveType.SquareWave, waveFormat.SampleRate, freqOsc, ampOsc, new ConstantScalar(0), new ConstantScalar(0));
             
             ScalarPassthrough scalarPassthru = new ScalarPassthrough(waveFormat, variableFreq);
 
             NoiseGenerator noiseGen = new NoiseGenerator(waveFormat, NoiseGenerator.NoiseType.WhiteNoise);
-            Oscillator sweep = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.2f), new ConstantScalar(500), new ConstantScalar(0), new ConstantScalar(1000));
-            HighPassFilter highpass = new HighPassFilter(waveFormat, sweep, noiseGen);
-            LowPassFilter lowpass = new LowPassFilter(waveFormat, sweep, noiseGen);
+            Oscillator freqsweep = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.2f), new ConstantScalar(400), new ConstantScalar(0), new ConstantScalar(500));
+            ConstantScalar qsweep = new ConstantScalar((float)(1.0 / Math.Sqrt(2)));
+            //Oscillator gainSweep = new Oscillator(Oscillator.WaveType.TriangleWave, waveFormat.SampleRate, new ConstantScalar(0.025f), new ConstantScalar(2), new ConstantScalar(0), new ConstantScalar(6));
+            ConstantScalar gainSweep = new ConstantScalar(6);
+            SampleProcessor.LowPassFilter filter = new SampleProcessor.LowPassFilter(waveFormat, freqsweep, qsweep, gainSweep, scalarPassthru);
 
             BasicAudioController basicAudioController = new BasicAudioController(GetSoundOut(), 1, 44100);
-            basicAudioController.addSource((ISampleSource)highpass);
+            basicAudioController.addSource((ISampleSource)filter);
             basicAudioController.startPlaying();
 
             Console.ReadKey();
