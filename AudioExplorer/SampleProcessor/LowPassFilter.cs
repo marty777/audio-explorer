@@ -9,14 +9,14 @@ namespace AudioExplorer.SampleProcessor
 {
     class LowPassFilter : BiQuadFilter
     {
-        public LowPassFilter(WaveFormat waveFormat, double frequency, ISampleSource source) : base(waveFormat, frequency, source)
+        public LowPassFilter(WaveFormat waveFormat, Scalar.Scalar frequency, ISampleSource source) : base(waveFormat, frequency, source)
         {
 
         }
 
         protected override void ComputeCoefficients()
         {
-            double k = Math.Tan(Math.PI * Frequency / WaveFormat.SampleRate);
+            double k = Math.Tan(Math.PI * _curr_frequency / WaveFormat.SampleRate);
             double norm = 1 / (1 + (k / Q) + (k * k));
             A0 = k * k * norm;
             A1 = 2 * A0;

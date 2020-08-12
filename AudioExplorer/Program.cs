@@ -30,8 +30,9 @@ namespace AudioExplorer
             ScalarPassthrough scalarPassthru = new ScalarPassthrough(waveFormat, variableFreq);
 
             NoiseGenerator noiseGen = new NoiseGenerator(waveFormat, NoiseGenerator.NoiseType.WhiteNoise);
-            HighPassFilter highpass = new HighPassFilter(waveFormat, 200, noiseGen);
-            //LowPassFilter lowpass = new LowPassFilter(waveFormat, 220, noiseGen);
+            Oscillator sweep = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.2f), new ConstantScalar(500), new ConstantScalar(0), new ConstantScalar(1000));
+            HighPassFilter highpass = new HighPassFilter(waveFormat, sweep, noiseGen);
+            LowPassFilter lowpass = new LowPassFilter(waveFormat, sweep, noiseGen);
 
             BasicAudioController basicAudioController = new BasicAudioController(GetSoundOut(), 1, 44100);
             basicAudioController.addSource((ISampleSource)highpass);

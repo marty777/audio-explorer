@@ -12,7 +12,8 @@ namespace AudioExplorer.SampleProcessor
     {
         private IReadableAudioSource<float> _source { get; set; }
 
-        private double _frequency;
+        private Scalar.Scalar _frequency;
+        protected double _curr_frequency;
         private double _q;
         private double _gainDB;
 
@@ -48,30 +49,23 @@ namespace AudioExplorer.SampleProcessor
             }
         }
 
-        public double Frequency
+        public Scalar.Scalar Frequency
         {
             get { return _frequency; }
             set
             {
-                if(_waveFormat.SampleRate < 2 * value)
-                {
-                    throw new ArgumentOutOfRangeException("Frequency must be less than half the sample rate");
-                }
-                if(value <= 0)
-                {
-                    throw new ArgumentOutOfRangeException("Frequency must be greater than zero");
-                }
+                if (value == null)
+                    throw new ArgumentNullException("value");
                 _frequency = value;
-                ComputeCoefficients();
             }
         }
 
-        public BiQuadFilter(WaveFormat waveFormat, double frequency, ISampleSource source) : this(waveFormat, frequency, 1.0/Math.Sqrt(2), source)
+        public BiQuadFilter(WaveFormat waveFormat, Scalar.Scalar frequency, ISampleSource source) : this(waveFormat, frequency, 1.0/Math.Sqrt(2), source)
         {
 
         }
 
-        public BiQuadFilter(WaveFormat waveFormat, double frequency, double q, ISampleSource source) : base(waveFormat)
+        public BiQuadFilter(WaveFormat waveFormat, Scalar.Scalar frequency, double q, ISampleSource source) : base(waveFormat)
         {
             _source = source;
             Frequency = frequency;
@@ -82,10 +76,15 @@ namespace AudioExplorer.SampleProcessor
         }
         
 
-        public float Process(float input)
+        public float Process(float input, float frequency)
         {
+            if (_curr_frequency != frequency)
+            {
+                _curr_frequency = frequency;
+                ComputeCoefficients();
+            }
             double o = input * A0 + Z1;
-            Z1 = input * A1 + Z2 - B1 * 0;
+            Z1 = input * A1 + Z2 - B1 * o;
             Z2 = input * A2 - B2 * o;
             return (float)o;
 
@@ -94,10 +93,12 @@ namespace AudioExplorer.SampleProcessor
         public override int Read(float[] buffer, int offset, int count)
         {
             float[] input = new float[buffer.Length];
+            float[] freq = new float[buffer.Length];
             _source.Read(input, offset, count);
+            _frequency.Read(freq, offset, count);
             for (int i = offset; i < count; i++)
             {
-                buffer[i] = Process(input[i]);
+                buffer[i] = Process(input[i], freq[i]);
             }
             return count;
         }

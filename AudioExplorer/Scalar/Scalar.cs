@@ -21,7 +21,7 @@ namespace AudioExplorer.Scalar
     /// </param>
     /// <param name="count">The maximum number of samples to read from the current source.</param>
     /// <returns>The total number of samples read into the buffer.</returns>
-    abstract class Scalar
+    public abstract class Scalar
     {
         public const float LFO_LO = -1;
         public const float LFO_HI = 1;
