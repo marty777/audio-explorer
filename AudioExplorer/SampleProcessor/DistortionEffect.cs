@@ -10,38 +10,69 @@ namespace AudioExplorer.SampleProcessor
     class DistortionEffect : SampleProcessor
     {
         private IReadableAudioSource<float> _source;
+        private Scalar.Scalar _gain;
+        private Scalar.Scalar _cutoff;
+
 
         private IReadableAudioSource<float> Source {
             get { return _source; }
             set
-             {
+            {
                 if (value == null)
                     throw new ArgumentNullException("value");
                 _source = value;
             }
         }
 
-        public DistortionEffect(WaveFormat waveFormat, IReadableAudioSource<float> source) : base(waveFormat)
+        private Scalar.Scalar Gain
+        {
+            get { return _gain; }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+                _gain = value;
+            }
+        }
+
+        private Scalar.Scalar Cutoff
+        {
+            get { return _cutoff; }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+                _cutoff = value;
+            }
+        }
+
+        public DistortionEffect(WaveFormat waveFormat, Scalar.Scalar gain, Scalar.Scalar cutoff, IReadableAudioSource<float> source) : base(waveFormat)
         {
             Source = source;
+            Gain = gain;
+            Cutoff = cutoff;
         }
 
         public override int Read(float[] buffer, int offset, int count)
         {
             float[] input = new float[buffer.Length];
+            float[] gain = new float[buffer.Length];
+            float[] cutoff = new float[buffer.Length];
             Source.Read(input, offset, count);
-            
+            Gain.Read(gain, offset, count);
+            Cutoff.Read(cutoff, offset, count);
             for (int i = offset; i < count; i++)
             {
-                // up the gain and use hard clipping on signal
-                float x = input[i] * 10.0f;
-                if (x < -1)
+                // basic hard clipping
+                float x = input[i] * gain[i];
+                float cut = Math.Abs(cutoff[i]);
+                if (x < -cut)
                 {
-                    buffer[i] = -1;
+                    buffer[i] = -cut;
                 }
-                else if (x > 1)
+                else if (x > cut)
                 {
-                    buffer[i] = 1;
+                    buffer[i] = cut;
                 }
                 else
                 {
