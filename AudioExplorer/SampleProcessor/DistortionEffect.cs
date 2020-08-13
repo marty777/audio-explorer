@@ -33,7 +33,8 @@ namespace AudioExplorer.SampleProcessor
             
             for (int i = offset; i < count; i++)
             {
-                float x = input[i];
+                // up the gain and use hard clipping on signal
+                float x = input[i] * 10.0f;
                 if (x < -1)
                 {
                     buffer[i] = -1;
@@ -46,8 +47,7 @@ namespace AudioExplorer.SampleProcessor
                 {
                     buffer[i] = x;
                 }
-
-
+                
             }
             return count;
         }
