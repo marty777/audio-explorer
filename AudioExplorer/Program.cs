@@ -22,22 +22,26 @@ namespace AudioExplorer
 
             WaveFormat waveFormat = new WaveFormat(44100, 16, 1);
             
-            Oscillator freqOsc = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.05f), new ConstantScalar(100.0f), new ConstantScalar(0), new ConstantScalar(120.0f));
+            Oscillator freqOsc = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.1f), new ConstantScalar(80.0f), new ConstantScalar(0), new ConstantScalar(100.0f));
             Oscillator ampOscVel = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.05f), new ConstantScalar(8.0f), new ConstantScalar(0.5f), new ConstantScalar(8.0f));
-            Oscillator ampOsc = new Oscillator(Oscillator.WaveType.SawtoothWave, waveFormat.SampleRate, ampOscVel, new ConstantScalar(0.5f), new ConstantScalar(0), new ConstantScalar(0.5f));
+            Oscillator ampOsc = new Oscillator(Oscillator.WaveType.SawtoothWave, waveFormat.SampleRate, ampOscVel, new ConstantScalar(0.5f), new ConstantScalar(0), new ConstantScalar(1.1f));
             Oscillator variableFreq = new Oscillator(Oscillator.WaveType.SquareWave, waveFormat.SampleRate, freqOsc, ampOsc, new ConstantScalar(0), new ConstantScalar(0));
             
             ScalarPassthrough scalarPassthru = new ScalarPassthrough(waveFormat, variableFreq);
 
             NoiseGenerator noiseGen = new NoiseGenerator(waveFormat, NoiseGenerator.NoiseType.WhiteNoise);
-            Oscillator freqsweep = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.2f), new ConstantScalar(400), new ConstantScalar(0), new ConstantScalar(500));
+            Oscillator freqsweep = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.2f), new ConstantScalar(350), new ConstantScalar(0), new ConstantScalar(500));
             ConstantScalar qsweep = new ConstantScalar((float)(1.0 / Math.Sqrt(2)));
             //Oscillator gainSweep = new Oscillator(Oscillator.WaveType.TriangleWave, waveFormat.SampleRate, new ConstantScalar(0.025f), new ConstantScalar(2), new ConstantScalar(0), new ConstantScalar(6));
             ConstantScalar gainSweep = new ConstantScalar(6);
-            SampleProcessor.LowPassFilter filter = new SampleProcessor.LowPassFilter(waveFormat, freqsweep, qsweep, gainSweep, scalarPassthru);
+            SampleProcessor.SampleProcessor filter = new SampleProcessor.NotchFilter(waveFormat, freqsweep, qsweep, gainSweep, scalarPassthru);
+
+            IWaveSource cleanguitar = CodecFactory.Instance.GetCodec(@"..\..\sampledata\gtr-jaz-2.mp3"); // Electric Guitar, Single-Coil Pickup sample taken from https://ccrma.stanford.edu/~jos/pasp/Sound_Examples.html
+            IReadableAudioSource<float> convertedguitar = cleanguitar.ToSampleSource();
+            SampleProcessor.DistortionEffect distortion = new SampleProcessor.DistortionEffect(waveFormat, convertedguitar);
 
             BasicAudioController basicAudioController = new BasicAudioController(GetSoundOut(), 1, 44100);
-            basicAudioController.addSource((ISampleSource)filter);
+            basicAudioController.addSource((ISampleSource)distortion);
             basicAudioController.startPlaying();
 
             Console.ReadKey();

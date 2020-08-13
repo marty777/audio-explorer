@@ -51,10 +51,13 @@
     <Compile Include="Audio\BasicAudioController.cs" />
     <Compile Include="Audio\SoundMixer.cs" />
     <Compile Include="ChromaticScale\ChromaticScale.cs" />
-    <Compile Include="SampleProcessor\BandPass.cs" />
+    <Compile Include="SampleProcessor\BandPassFilter.cs" />
     <Compile Include="SampleProcessor\BiQuadFilter.cs" />
+    <Compile Include="SampleProcessor\DistortionEffect.cs" />
     <Compile Include="SampleProcessor\HighPassFilter.cs" />
+    <Compile Include="SampleProcessor\HighShelfFilter.cs" />
     <Compile Include="SampleProcessor\LowPassFilter.cs" />
+    <Compile Include="SampleProcessor\LowShelfFilter.cs" />
     <Compile Include="SampleProcessor\NotchFilter.cs" />
     <Compile Include="SampleProcessor\PeakFilter.cs" />
     <Compile Include="SampleProcessor\ScalarPassthrough.cs" />
