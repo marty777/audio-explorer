@@ -30,8 +30,8 @@ namespace AudioExplorer
             ScalarPassthrough scalarPassthru = new ScalarPassthrough(waveFormat, variableFreq);
 
             NoiseGenerator noiseGen = new NoiseGenerator(waveFormat, NoiseGenerator.NoiseType.WhiteNoise);
-            Oscillator freqsweep = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.2f), new ConstantScalar(350), new ConstantScalar(0), new ConstantScalar(500));
-            ConstantScalar qsweep = new ConstantScalar((float)(1.0 / Math.Sqrt(2)));
+            Oscillator freqsweep = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.1f), new ConstantScalar(200), new ConstantScalar(0), new ConstantScalar(440));
+            Oscillator qsweep = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(1.0f), new ConstantScalar(0.9f), new ConstantScalar(0), new ConstantScalar(1.0f)); //new ConstantScalar((float)(1.0 / Math.Sqrt(2)));
             //Oscillator gainSweep = new Oscillator(Oscillator.WaveType.TriangleWave, waveFormat.SampleRate, new ConstantScalar(0.025f), new ConstantScalar(2), new ConstantScalar(0), new ConstantScalar(6));
             ConstantScalar gainSweep = new ConstantScalar(6);
             SampleProcessor.SampleProcessor filter = new SampleProcessor.NotchFilter(waveFormat, freqsweep, qsweep, gainSweep, scalarPassthru);
@@ -39,14 +39,15 @@ namespace AudioExplorer
 
             // distortion "pedal" on a minimally modified hard body electric guitar signal
             Oscillator gainOsc = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.5f), new ConstantScalar(2), new ConstantScalar(0), new ConstantScalar(5));
-            Oscillator cutoffOsc = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.25f), new ConstantScalar(3), new ConstantScalar(0), new ConstantScalar(4));
+            Oscillator cutoffOsc = new Oscillator(Oscillator.WaveType.SineWave, waveFormat.SampleRate, new ConstantScalar(0.95f), new ConstantScalar(3), new ConstantScalar(0), new ConstantScalar(4));
             ConstantScalar cutoff = new ConstantScalar(0.2f);
             IWaveSource cleanguitar = CodecFactory.Instance.GetCodec(@"..\..\sampledata\guitar-sample.mp3"); // sample signal from single-pickup electric guitar. Recorded 8/14/20.
             IReadableAudioSource<float> convertedguitar = cleanguitar.ToMono().ToSampleSource();
             SampleProcessor.DistortionEffect distortion = new SampleProcessor.DistortionEffect(waveFormat, gainOsc,cutoff,convertedguitar);
+            SampleProcessor.SampleProcessor reverbEffect = new SampleProcessor.ReverbEffect(waveFormat, new ConstantScalar(0.4f), new ConstantScalar(0.5f), waveFormat.SampleRate, distortion);
 
             BasicAudioController basicAudioController = new BasicAudioController(GetSoundOut(), 1, 44100);
-            basicAudioController.addSource((ISampleSource)distortion);
+            basicAudioController.addSource((ISampleSource)reverbEffect);
             basicAudioController.startPlaying();
 
             Console.ReadKey();

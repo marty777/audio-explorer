@@ -60,6 +60,7 @@
     <Compile Include="SampleProcessor\LowShelfFilter.cs" />
     <Compile Include="SampleProcessor\NotchFilter.cs" />
     <Compile Include="SampleProcessor\PeakFilter.cs" />
+    <Compile Include="SampleProcessor\ReverbEffect.cs" />
     <Compile Include="SampleProcessor\ScalarPassthrough.cs" />
     <Compile Include="SampleProcessor\VolumeModulator.cs" />
     <Compile Include="SampleSource\NoiseGenerator.cs" />
